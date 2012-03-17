@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright 2005-2010 The Kuali Foundation.
+
+	Licensed under the Educational Community License, Version 1.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.opensource.org/licenses/ecl1.php
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:p="http://www.springframework.org/schema/p" 
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+                           http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context-2.5.xsd	
+                           http://www.springframework.org/schema/lang
+                           http://www.springframework.org/schema/lang/spring-lang-2.5.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+                           
+    <bean id="institutionalProposalModuleConfiguration" parent="institutionalProposalModuleConfiguration-parentBean" />
+    <bean id="institutionalProposalModuleConfiguration-parentBean" class="org.kuali.rice.kns.bo.ModuleConfiguration" abstract="true">
+		<property name="initializeDataDictionary" value="true" />
+		<property name="databaseRepositoryFilePaths">
+			<list>
+				<value>org/kuali/kra/institutionalproposal/repository-institutionalproposal.xml</value>
+			</list>
+		</property>
+		<property name="dataDictionaryPackages">
+            <list>
+                <value>org/kuali/kra/institutionalproposal/proposallog</value>
+            </list>
+        </property>
+	</bean>
+	
+		<!-- Institute Proposal Service Configuration Start -->
+		<bean id="institutionalProposalPersonService"
+			class="org.kuali.kra.institutionalproposal.printing.service.impl.InstitutionalProposalPersonServiceImpl">
+			<property name="businessObjectService">
+				<ref bean="businessObjectService" />
+			</property>
+		</bean>
+		<bean id="institutionalProposalXmlStream"
+			class="org.kuali.kra.institutionalproposal.printing.xmlstream.InstitutionalProposalXmlStream">
+			<property name="businessObjectService">
+				<ref bean="businessObjectService" />
+			</property>
+			<property name="dateTimeService">
+				<ref bean="dateTimeService" />
+			</property>
+			<property name="institutionalProposalPersonService">
+				<ref bean="institutionalProposalPersonService" />
+			</property>
+		</bean>
+		<bean id="institutionalProposalPrint"
+			class="org.kuali.kra.institutionalproposal.printing.print.InstitutionalProposalPrint">
+			<property name="xmlStream" ref="institutionalProposalXmlStream" />
+		</bean>
+		<bean id="institutionalProposalPrintingService"
+			class="org.kuali.kra.institutionalproposal.printing.service.impl.InstitutionalProposalPrintingServiceImpl">
+			<property name="institutionalProposalPrint"
+				ref="institutionalProposalPrint" />
+			<property name="printingService" ref="printingService" />
+		</bean>
+		<bean id="proposalLogPrint"
+			class="org.kuali.kra.institutionalproposal.proposallog.printing.ProposalLogPrint">
+			<property name="xmlStream" ref="proposalLogXmlStream" />
+		</bean>		
+        <bean id="proposalLogXmlStream"
+              class="org.kuali.kra.institutionalproposal.proposallog.printing.ProposalLogXmlStream">
+			<property name="businessObjectService">
+				<ref bean="businessObjectService" />
+			</property>
+			<property name="dateTimeService">
+				<ref bean="dateTimeService" />
+			</property>
+        </bean>
+		<bean id="proposalLogPrintingService"
+			class="org.kuali.kra.institutionalproposal.proposallog.service.impl.ProposalLogPrintingServiceImpl">
+			<property name="proposalLogPrint"
+				ref="proposalLogPrint" />
+			<property name="printingService" ref="printingService" />
+			<property name="businessObjectService">
+				<ref bean="businessObjectService" />
+			</property>			
+		</bean>
+		<!-- Institute Proposal Service Configuration End -->
+
+	<bean id="institutionalProposalCustomAttributeService" class="org.kuali.kra.service.impl.InstitutionalProposalCustomAttributeServiceImpl">
+		<property name="businessObjectService">
+		    <ref bean="businessObjectService" />
+		</property>
+	</bean>
+	
+	<bean id="institutionalProposalLookupable" class="org.kuali.rice.kns.lookup.KualiLookupableImpl" scope="prototype">
+        <property name="lookupableHelperService">
+            <ref bean="institutionalProposalLookupableHelperService" />
+        </property>
+    </bean> 
+
+    <bean id="institutionalProposalLookupableHelperService" class="org.kuali.kra.institutionalproposal.service.impl.InstitutionalProposalLookupableHelperServiceImpl" 
+        scope="prototype" parent="lookupableHelperService">
+        <property name="businessObjectService">
+            <ref bean="businessObjectService" />
+        </property>
+        <property name="documentService">
+        	<ref bean="documentService" />
+        </property>
+    </bean>
+    
+    <bean id="institutionalProposalVersioningService" class="org.kuali.kra.institutionalproposal.service.impl.InstitutionalProposalVersioningServiceImpl">
+        <property name="businessObjectService">
+            <ref bean="businessObjectService" />
+        </property>
+        <property name="versioningService">
+            <ref bean="versioningService" />
+        </property>
+    </bean>
+    
+    <bean id="institutionalProposalLockService" class="org.kuali.kra.institutionalproposal.service.impl.InstitutionalProposalLockServiceImpl">
+		<property name="businessObjectService" ref="businessObjectService" />
+	</bean>
+	
+	<bean id="institutionalProposalService" class="org.kuali.kra.institutionalproposal.service.impl.InstitutionalProposalServiceImpl">
+        <property name="documentService" ref="documentService" />
+        <property name="businessObjectService" ref="businessObjectService" />
+        <property name="versioningService" ref="versioningService" />
+        <property name="institutionalProposalVersioningService" ref="institutionalProposalVersioningService" />
+        <property name="sequenceAccessorService" ref="sequenceAccessorService" />
+    </bean>
+    
+    <bean id="proposalLogLookupable" class="org.kuali.rice.kns.lookup.KualiLookupableImpl" scope="prototype">
+        <property name="lookupableHelperService">
+            <ref bean="proposalLogLookupableHelperService" />
+        </property>         
+    </bean> 
+
+    <bean id="proposalLogLookupableHelperService" class="org.kuali.kra.institutionalproposal.proposallog.ProposalLogLookupableHelperServiceImpl" 
+        scope="prototype" parent="lookupableHelperService">
+    </bean>
+    
+    <bean id="proposalLogService" class="org.kuali.kra.institutionalproposal.proposallog.service.impl.ProposalLogServiceImpl">
+        <property name="businessObjectService" ref="businessObjectService" />
+    </bean>
+
+	<bean id="proposalLogPiDerivedRoleTypeService"
+		class="org.kuali.kra.institutionalproposal.proposallog.service.impl.ProposalLogPiDerivedRoleTypeServiceImpl">
+	</bean>
+	<bean class="org.kuali.rice.ksb.messaging.KSBExporter">
+		<property name="serviceDefinition">
+			<bean parent="kcService" p:service-ref="proposalLogPiDerivedRoleTypeService"
+				p:localServiceName="proposalLogPiDerivedRoleTypeService" />
+		</property>
+	</bean>
+
+    
+</beans>

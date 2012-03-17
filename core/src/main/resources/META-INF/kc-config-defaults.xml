@@ -1,0 +1,159 @@
+<!--
+ Copyright 2005-2010 The Kuali Foundation
+ 
+ Licensed under the Educational Community License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.opensource.org/licenses/ecl2.php
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<!-- 
+	This config should not reference other config locations.  It should only contain properties that are specific to
+    kc or are different from the rice defaults.
+-->
+<config>
+	
+	<!-- must set override to false because these properties might have been set by the build process -->
+	<param name="build.environment" override="false">dev</param>
+	<param name="build.version" override="false">NO VERSION</param>
+
+	<!-- run modes -->
+	<!-- when changing runmodes to embedded/remote make sure to update rice server DB & turn dev.mode to false -->
+	<param name="kim.runmode">local</param>
+	<param name="kcb.runmode">local</param>
+	<param name="kew.runmode">local</param>
+	<param name="ken.runmode">local</param>
+	
+	<param name="dev.mode">true</param>
+
+	<param name="service.namespace">KC</param>
+	<param name="app.namespace">${service.namespace}</param>
+
+	<param name="module.name">kc</param>
+	<param name="app.code">${module.name}</param>
+	
+	<param name="application.host">127.0.0.1</param>
+	
+	<!-- for local (bundled mode) this defaults to the kc client url -->
+	<param name="rice.app.url">${application.url}</param>
+
+	<param name="externalizable.help.url">/${app.context.name}/static/help/</param>
+	<param name="externalizable.images.url">/${app.context.name}/kr/static/images/</param>
+	<param name="kr.externalizable.images.url">/${app.context.name}/kr/static/images/</param>
+	<param name="kra.externalizable.images.url">/${app.context.name}/static/images/</param>
+
+	<param name="javascript.files">scripts/kuali_application.js,kr/scripts/core.js,kr/scripts/dhtml.js,kr/scripts/my_common.js,kr/scripts/jscalendar-1.0/calendar.js,kr/scripts/jscalendar-1.0/lang/calendar-en.js,kr/scripts/jscalendar-1.0/calendar-setup.js,dwr/engine.js,dwr/util.js,dwr/interface/PersonService.js,kr/scripts/objectInfo.js,dwr/interface/CustomAttributeService.js,dwr/interface/ProposalDevelopmentService.js,dwr/interface/BudgetService.js,dwr/interface/ArgValueLookupService.js,dwr/interface/AwardTemplateReportTermService.js,dwr/interface/S2SService.js</param>
+	<param name="css.files">kr/css/kuali.css,css/kuali_application.css,kr/scripts/jscalendar-1.0/calendar-win2k-1.css</param>
+
+	<param name="portal.css.files">rice-portal/css/portal.css,css/kuali_overrides.css</param>
+	<param name="portal.javascript.files">kr/scripts/my_common.js</param>
+	
+	<param name="portal.title" override="false">Kuali Coeus</param>
+
+	<param name="kr.url">${rice.app.url}/kr</param>
+	<param name="ken.url">${rice.app.url}/ken</param>
+	<param name="kew.url">${rice.app.url}/kew</param>
+	<param name="kim.url">${rice.app.url}/kim</param>
+	<param name="ksb.url">${rice.app.url}/ksb</param>
+	<param name="rice.url">${rice.app.url}/kr</param>
+	<param name="workflow.url">${kew.url}</param>
+	<param name="kuali.docHandler.url.prefix">${application.url}</param>
+	
+	<!--messages -->
+	<param name="core.rice.struts.message.resources">KR-ApplicationResources,org.kuali.rice.kew.ApplicationResources,org.kuali.rice.ksb.messaging.ApplicationResources,KIM-ApplicationResources</param>
+	<param name="kc.struts.message.resources">ApplicationResources</param>
+	<param name="rice.struts.message.resources">${core.rice.struts.message.resources}, ${kc.struts.message.resources}</param>
+
+	<!-- KC Client DB -->
+	<param name="datasource.url">jdbc:oracle:thin:@127.0.0.1:1521:KUALI</param>
+	<param name="datasource.username">KRADEV</param>
+	<param name="datasource.password">ask your team</param>
+	
+	<!-- overriding from rice's default - remove override once rice's changes their default -->
+	<param name="datasource.pool.maxSize">20</param>
+	
+	<!-- Rice Server DB -->
+	<!-- Should be the same as KC Client DB when running bundled mode -->
+	<param name="server.datasource.url">${datasource.url}</param>
+	<param name="server.datasource.username">${datasource.username}</param>
+	<param name="server.datasource.password">${datasource.password}</param>
+	<param name="server.datasource.ojb.platform">${datasource.ojb.platform}</param>
+	<param name="server.datasource.platform">${datasource.platform}</param>
+	<param name="server.datasource.driver.name">${datasource.driver.name}</param>
+	<param name="server.datasource.pool.validationQuery">${datasource.pool.validationQuery}</param>
+	<param name="server.datasource.pool.maxWait">${datasource.pool.maxWait}</param>
+	<param name="server.datasource.pool.minSize">${datasource.pool.minSize}</param>
+	<param name="server.datasource.pool.maxSize">${datasource.pool.maxSize}</param>
+	<param name="server.datasource.pool.size">${datasource.pool.size}</param>
+	<param name="server.datasource.connectionTimeout">${datasource.connectionTimeout}</param>
+
+	<param name="keystore.alias">onestartsharedservices-devandtst</param>
+	<param name="keystore.file">kul</param>
+	<param name="keystore.password">kulpass</param>
+
+	<!-- XML ingester directories -->
+	<param name="data.xml.root.location">/opt/ears/${environment}/en/xml</param>
+	<param name="attachment.dir.location">/opt/ears/</param>
+
+	<!-- Kuali parameters -->
+	<param name="encryption.key">7IC64w6ksLU</param>
+
+	<!-- workaround until Rice resolves KULRICE-4065 -->
+	<param name="enable.nonproduction.data.unmasking">true</param>
+
+	<!-- Configuration for Exception Incident handling and reporting -->
+	<param name="KualiExceptionHandlerAction.EXCEPTION_INCIDENT_REPORT_SERVICE">knsExceptionIncidentService</param>
+	<param name="MailMessage.from">admin@kuali.org</param>
+	<param name="KualiExceptionIncidentServiceImpl.additionalExceptionNameList"></param>
+	<param name="KualiExceptionIncidentServiceImpl.REPORT_MAIL_LIST"></param>
+	<!-- End of Exception Incident handling and reporting -->
+
+	<!-- Turn off KEW use of quartz db to avoid db clear issues -->
+	<param name="useQuartzDatabase">false</param>
+
+	<!-- KC quartz table prefix -->
+	<param name="kcQuartzDatabasePrefix">KC_QRTZ_</param>
+	<!-- User the kc batch jobs run as -->
+	<param name="batchJobUserName">kc</param>
+	
+	<param name="documentSearch.resultProcessor.class.name">org.kuali.kra.proposaldevelopment.document.search.ProposalDocumentSearchResultProcessor</param>
+
+	<!-- Java mail properties -->
+	<param name="mail.from">mail.from@kuali.org</param>
+	<param name="mail.transport.protocol">smtp</param>
+	<param name="mail.smtp.host">host.server.address</param>
+	<param name="mail.smtp.port">host.server.port</param>
+	<param name="mail.smtp.user">userId</param>
+	<param name="mail.user.credentials">password</param>
+	<param name="mail.smtp.auth">false</param>
+	
+	<param name="s2s.keystore.location">path to keystore</param>
+	<param name="s2s.keystore.password">keystore password</param>
+	<param name="s2s.truststore.location">path to truststore</param>
+	<param name="s2s.truststore.password">truststore password</param>
+	
+	<param name="grants.gov.s2s.host.production">https://ws07.grants.gov:446/app-s2s-server/services</param>
+	<param name="grants.gov.s2s.host.development">https://at07ws.grants.gov:446/app-s2s-server/services</param>
+	<param name="grants.gov.s2s.host">${grants.gov.s2s.host.development}</param>
+	
+	<param name="grants.gov.s2s.port">ApplicantIntegrationSoapPort</param>
+
+	<param name="filter.login.class">org.kuali.rice.kew.web.DummyLoginFilter</param>
+	<param name="filtermapping.login.1">/*</param>
+	
+	<param name="transaction.timeout">3600</param>
+	
+	<!-- image overrides -->
+	<param name="application.custom.image.url.copyoneper">/${app.context.name}/static/images/buttonsmall_copyallperiods.gif</param>
+	<param name="application.custom.image.url.copyallperiods">/${app.context.name}/static/images/buttonsmall_copyoneper.gif</param>
+	
+	<param name="rice.logging.configure">true</param>
+	<param name="kim.show.blank.qualifiers">false</param>
+	<param name="shared.rice">false</param>
+</config>

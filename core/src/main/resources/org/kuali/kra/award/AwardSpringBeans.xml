@@ -1,0 +1,788 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright 2005-2010 The Kuali Foundation.
+
+	Licensed under the Educational Community License, Version 1.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.opensource.org/licenses/ecl1.php
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:p="http://www.springframework.org/schema/p" 
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+                           http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context-2.5.xsd	
+                           http://www.springframework.org/schema/lang
+                           http://www.springframework.org/schema/lang/spring-lang-2.5.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+  	
+    <bean id="awardModuleConfiguration" parent="awardModuleConfiguration-parentBean" />
+	
+    <bean id="awardModuleConfiguration-parentBean" class="org.kuali.rice.kns.bo.ModuleConfiguration" abstract="true">
+		<property name="databaseRepositoryFilePaths">
+			<list>
+				<value>org/kuali/kra/award/repository-award.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="awardService" class="org.kuali.kra.award.home.AwardServiceImpl">
+        <property name="businessObjectService">
+            <ref bean="businessObjectService" />
+        </property>
+        <property name="documentService">
+            <ref bean="documentService" />
+        </property>
+        <property name="versioningService">
+            <ref bean="versioningService" />
+        </property>
+        <property name="versionHistoryService">
+            <ref bean="versionHistoryService" />
+        </property>
+        <property name="budgetSummaryService">
+            <ref bean="budgetSummaryService" />
+        </property>
+        <property name="parameterService">
+            <ref bean="parameterService" />
+        </property>
+        
+    </bean>
+
+	<bean id="awardHierarchyUIService" class="org.kuali.kra.service.impl.AwardHierarchyUIServiceImpl" scope="prototype">
+		<property name="businessObjectService">
+			<ref bean="businessObjectService" />
+		</property>
+		<property name="activePendingTransactionsService">
+			<ref bean="activePendingTransactionsService" />
+		</property>
+		<property name="awardHierarchyService">
+			<ref bean="awardHierarchyService" />
+		</property>        
+	</bean>
+
+	<bean id="parentAwardAuthorizer" abstract="true">
+        <property name="unitAuthorizationService" ref="unitAuthorizationService" />
+        <property name="kraWorkflowService" ref="kraWorkflowService" />
+        <property name="kcPersonService" ref="kcPersonService" />
+        <property name="kraAuthorizationService" ref="kraAuthorizationService" />
+    </bean>
+
+	<bean id="awardTaskAuthorizers" class="org.kuali.kra.authorization.TaskAuthorizerGroup">
+        <property name="groupName" value="award" />
+        <property name="taskAuthorizers">
+            <list>
+                <bean class="org.kuali.kra.award.document.authorizer.ModifyAwardAuthorizer" parent="parentAwardAuthorizer">
+                    <property name="taskName" value="modifyAward" />
+                </bean>
+                
+                <bean class="org.kuali.kra.award.document.authorizer.ViewAwardAuthorizer" parent="parentAwardAuthorizer">
+                    <property name="taskName" value="viewAward" />
+                </bean>
+                
+                <!--  Task Authorizer for modifying persons and their roles on an award -->
+                <bean class="org.kuali.kra.award.document.authorizer.ModifyAwardPermissionsAuthorizer" parent="parentAwardAuthorizer">
+                    <property name="taskName" value="modifyAwardRoles" /> 
+                </bean>
+                
+                <bean class="org.kuali.kra.award.document.authorizer.CreateAwardBudgetAuthorizer" parent="parentAwardAuthorizer">
+                    <property name="taskName" value="addBudget" />
+                </bean>
+                
+                <bean class="org.kuali.kra.award.document.authorizer.OpenAwardBudgetAuthorizer" parent="parentAwardAuthorizer">
+                    <property name="taskName" value="openBudgets" />
+                </bean>  
+                <bean class="org.kuali.kra.award.document.authorizer.MaintainAwardReportTrackingAuthorizer" parent="parentAwardAuthorizer">
+                    <property name="taskName" value="maintainReportTracking" />
+                </bean>              
+            </list>
+         </property>
+     </bean>
+     
+    <bean id="awardBudgetsWebAuthorizer"
+          class="org.kuali.kra.web.struts.authorization.WebAuthorizer">
+
+        <property name="classname"
+                  value="org.kuali.kra.award.web.struts.action.AwardBudgetsAction" />
+        <property name="mappings">
+            <map>
+                <entry key="addBudgetVersion">
+                    <bean class="org.kuali.kra.award.web.struts.authorization.AwardTaskFactory" parent="parentTaskFactory">
+                        <property name="taskName" value="addBudget" />
+                    </bean>
+                </entry>
+                <entry key="openBudgetVersion">
+                    <bean class="org.kuali.kra.award.web.struts.authorization.AwardTaskFactory" parent="parentTaskFactory">
+                        <property name="taskName" value="openBudgets" />
+                    </bean>
+                </entry>
+                <entry key="copyBudgetVersion">
+                    <bean class="org.kuali.kra.award.web.struts.authorization.AwardTaskFactory" parent="parentTaskFactory">
+                        <property name="taskName" value="addBudget" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+    
+	<bean id="awardFandaRateService" class="org.kuali.kra.award.commitments.AwardFandaRateServiceImpl">
+		<property name="parameterService">
+			<ref bean="parameterService" />
+		</property>
+		<property name="businessObjectService">
+            <ref bean="businessObjectService" />
+        </property>
+	</bean>
+	
+	<bean id="awardReportsService" class="org.kuali.kra.service.impl.AwardReportsServiceImpl">
+		<property name="parameterService">
+			<ref bean="parameterService" />
+		</property>
+		<property name="businessObjectService">
+			<ref bean="businessObjectService" />
+		</property>		
+	</bean>
+	
+	<bean id="awardSponsorTermService" class="org.kuali.kra.service.impl.AwardSponsorTermServiceImpl">
+	</bean>
+	<bean id="awardCommentService" class="org.kuali.kra.service.impl.AwardCommentServiceImpl">
+		<property name="businessObjectService">
+		    <ref bean="businessObjectService" />
+		</property>
+	</bean>
+	<bean id="awardDirectFandADistributionService" class="org.kuali.kra.service.impl.AwardDirectFandADistributionServiceImpl">
+	</bean>
+	<bean id="keywordsService" class="org.kuali.kra.service.impl.KeywordsServiceImpl">
+	</bean>
+
+	<bean id="awardScheduleGenerationService" class="org.kuali.kra.service.impl.AwardScheduleGenerationServiceImpl">
+		<property name="scheduleService">
+			<ref bean="scheduleService" />
+		</property>
+		<property name="persistenceService">
+			<ref bean="persistenceService" />
+		</property>
+		<property name="parameterService">
+			<ref bean="parameterService" />
+		</property>
+		<property name="awardAmountInfoService">
+			<ref bean="awardAmountInfoService" />
+		</property>
+	</bean>
+	<bean id="awardCustomAttributeService" class="org.kuali.kra.service.impl.AwardCustomAttributeServiceImpl">
+		<property name="businessObjectService">
+		    <ref bean="businessObjectService" />
+		</property>
+	</bean>
+	
+	<bean id="awardTemplateSyncService" class="org.kuali.kra.award.AwardTemplateSyncServiceImpl">
+		<property name="businessObjectService">
+		    <ref bean="businessObjectService" />
+		</property>
+		<property name="kualiRuleService">
+		    <ref bean="kualiRuleService" />
+		</property>
+	</bean>
+
+	<bean id="awardLookupable" class="org.kuali.rice.kns.lookup.KualiLookupableImpl" scope="prototype">
+  		<property name="lookupableHelperService">
+    		<ref bean="awardLookupableHelperService" />
+  		</property>  		
+	</bean>
+	
+	<bean id="awardPersonLookupable" class="org.kuali.rice.kns.lookup.KualiLookupableImpl" scope="prototype">
+  		<property name="lookupableHelperService">
+    		<ref bean="awardPersonLookupableHelperService" />
+  		</property>  		
+	</bean>		
+
+	<bean id="awardLookupableHelperService" class="org.kuali.kra.award.lookup.AwardLookupableHelperServiceImpl" parent="lookupableHelperService" scope="prototype">
+        <property name="kcPersonService" ref="kcPersonService" /> 
+        <property name="versionHistoryService">
+            <ref bean="versionHistoryService" />
+        </property>
+  	</bean>
+
+	<bean id="awardPersonLookupableHelperService" class="org.kuali.kra.award.lookup.AwardPersonLookupableHelperServiceImpl" parent="lookupableHelperService" scope="prototype">
+        <property name="awardPersonDao">
+            <ref bean="awardPersonDao" />
+        </property>
+  	</bean>
+
+	<bean id="awardPersonDao" parent="platformAwareDao" class="org.kuali.kra.award.dao.AwardPersonDaoOjb">
+		<property name="lookupDao">
+            <ref bean="lookupDao" />
+        </property>
+        <property name="dataDictionaryService">
+            <ref bean="dataDictionaryService" />
+        </property>
+	</bean>
+
+    <bean id="awardNumberService" class="org.kuali.kra.award.AwardNumberServiceImpl">
+        <property name="sequenceAccessorService">
+            <ref bean="sequenceAccessorService" />
+        </property>
+        <property name="kraLookupDao">
+            <ref bean="kraLookupDao" />
+        </property>
+    </bean>
+    
+    <bean id="awardCloseoutService" class="org.kuali.kra.award.paymentreports.closeout.AwardCloseoutServiceImpl">
+        <property name="persistenceService">
+            <ref bean="persistenceService" />
+        </property>
+        <property name="dateTimeService">
+            <ref bean="dateTimeService" />
+        </property>
+    </bean>
+    
+    <bean id="awardHierarchyService" class="org.kuali.kra.award.awardhierarchy.AwardHierarchyServiceImpl">
+        <property name="businessObjectService">
+            <ref bean="businessObjectService" />
+        </property>
+        <property name="documentService">
+            <ref bean="documentService" />
+        </property>
+        <property name="awardNumberService">
+            <ref bean="awardNumberService" />
+        </property>
+        <property name="versioningService">
+            <ref bean="versioningService" />
+        </property>
+        <property name="versionHistoryService">
+            <ref bean="versionHistoryService" />
+        </property>
+        <property name="awardAmountInfoService">
+        	<ref bean="awardAmountInfoService" />
+        </property>
+        <property name="activePendingTransactionsService">
+        	<ref bean="activePendingTransactionsService" />
+        </property>
+        <property name="kualiConfigurationService">
+        	<ref bean="kualiConfigurationService" />
+        </property>
+        <property name="awardService">
+        	<ref bean="awardService"/>
+       	</property>
+    </bean>
+    
+    <bean id="awardAmountInfoService" class="org.kuali.kra.award.AwardAmountInfoServiceImpl">	
+    	<property name="businessObjectService">
+		    <ref bean="businessObjectService" />
+		</property>	
+		<property name="documentService">
+		    <ref bean="documentService" />
+		</property>
+	</bean>
+	
+	<bean id="awardLockService" class="org.kuali.kra.award.AwardLockServiceImpl">
+		<property name="businessObjectService" ref="businessObjectService" />
+	</bean>
+
+		<!-- Award Printing Service Configuration Start -->
+		
+		<bean id="awardBaseStream"
+			class="org.kuali.kra.award.printing.xmlstream.AwardBaseStream" abstract="true">
+			<property name="businessObjectService">
+				<ref bean="businessObjectService" />
+			</property>
+			<property name="dateTimeService">
+				<ref bean="dateTimeService" />
+			</property>
+			<property name="documentService">
+				<ref bean="documentService" />
+			</property>
+			<property name="parameterService">
+				<ref bean="parameterService" />
+			</property>
+		</bean>
+		<bean id="awardDeltaXmlStream"
+			class="org.kuali.kra.award.printing.xmlstream.AwardDeltaXmlStream" parent="awardBaseStream">
+			<property name="versionHistoryService">
+				<ref bean="versionHistoryService" />
+			</property>
+		</bean>
+		<bean id="awardNoticeXmlStream"
+			class="org.kuali.kra.award.printing.xmlstream.AwardNoticeXmlStream" parent="awardBaseStream">
+			<property name="versionHistoryService">
+				<ref bean="versionHistoryService" />
+			</property>
+		</bean>
+		<bean id="awardTemplateXmlStream"
+			class="org.kuali.kra.award.printing.xmlstream.AwardTemplateXmlStream">
+			<property name="businessObjectService">
+				<ref bean="businessObjectService" />
+			</property>
+			<property name="dateTimeService">
+				<ref bean="dateTimeService" />
+			</property>
+		</bean>
+		<bean id="awardMoneyAndEndDatesHistoryXmlStream"
+			class="org.kuali.kra.award.printing.xmlstream.MoneyAndEndDatesHistoryXmlStream" parent="awardBaseStream">
+		</bean>
+		
+		<bean id="awardBudgetBaseStream"
+			class="org.kuali.kra.award.printing.xmlstream.AwardBudgetBaseStream" abstract="true">
+			<property name="businessObjectService">
+				<ref bean="businessObjectService" />
+			</property>
+			<property name="dateTimeService">
+				<ref bean="dateTimeService" />
+			</property>
+			<property name="parameterService">
+				<ref bean="parameterService" />
+			</property>
+		</bean>
+		<bean id="awardBudgetHierarchyXmlStream"
+			class="org.kuali.kra.award.printing.xmlstream.AwardBudgetHierarchyXmlStream" parent="awardBudgetBaseStream">
+		</bean>
+		<bean id="awardBudgetHistoryTransactionXmlStream"
+			class="org.kuali.kra.award.printing.xmlstream.AwardBudgetHistoryTransactionXmlStream" parent="awardBudgetBaseStream">
+		</bean>
+	
+	
+		<bean id="awardTemplatePrint"
+			class="org.kuali.kra.award.printing.print.AwardTemplatePrint">
+			<property name="xmlStream" ref="awardTemplateXmlStream" />
+		</bean>
+		<bean id="awardDeltaPrint"
+			class="org.kuali.kra.award.printing.print.AwardDeltaPrint">
+			<property name="xmlStream" ref="awardDeltaXmlStream" />
+		</bean>
+		<bean id="awardNoticePrint"
+			class="org.kuali.kra.award.printing.print.AwardNoticePrint">
+			<property name="xmlStream" ref="awardNoticeXmlStream" />
+		</bean>
+		<bean id="moneyAndEndDatesHistoryPrint"
+			class="org.kuali.kra.award.printing.print.MoneyAndEndDatesHistoryPrint">
+			<property name="xmlStream"
+				ref="awardMoneyAndEndDatesHistoryXmlStream" />
+		</bean>
+		<bean id="awardBudgetHierarchyPrint"
+			class="org.kuali.kra.award.printing.print.AwardBudgetHierarchyPrint">
+			<property name="xmlStream" ref="awardBudgetHierarchyXmlStream" />
+		</bean>
+		<bean id="awardBudgetHistoryTransactionPrint"
+			class="org.kuali.kra.award.printing.print.AwardBudgetHistoryTransactionPrint">
+			<property name="xmlStream"
+				ref="awardBudgetHistoryTransactionXmlStream" />
+		</bean>
+	
+		<bean id="awardPrintingService"
+			class="org.kuali.kra.award.printing.service.impl.AwardPrintingServiceImpl">
+			<property name="awardDeltaPrint" ref="awardDeltaPrint" />
+			<property name="awardNoticePrint" ref="awardNoticePrint" />
+			<property name="awardTemplatePrint" ref="awardTemplatePrint" />
+			<property name="moneyAndEndDatesHistoryPrint"
+				ref="moneyAndEndDatesHistoryPrint" />
+			<property name="awardBudgetHierarchyPrint"
+				ref="awardBudgetHierarchyPrint" />
+			<property name="awardBudgetHistoryTransactionPrint"
+				ref="awardBudgetHistoryTransactionPrint" />
+			<property name="printingService" ref="printingService" />
+		</bean>
+		<!-- Award Printing Service Configuration End -->
+	
+	<bean id="awardTransactionLookupService" class="org.kuali.kra.award.lookup.AwardTransactionLookupServiceImpl">
+		<property name="businessObjectService" ref="businessObjectService" />
+	</bean>
+	<bean id="awardPaymentAndInvoicesService" class = "org.kuali.kra.service.AwardPaymentAndInvoicesServiceImpl">
+		<property name = "businessObjectService" ref = "businessObjectService"/>
+	</bean>
+	
+    <bean id="enWorkflowUtilityService"
+		class="org.kuali.rice.kns.config.GlobalResourceLoaderServiceFactoryBean">
+		<property name="serviceName" value="enWorkflowUtilityService" />
+	</bean>
+	
+	<bean id="awardSyncUtilityService" class="org.kuali.kra.award.awardhierarchy.sync.service.AwardSyncUtilityServiceImpl">
+		<property name="workflowUtility" ref="enWorkflowUtilityService" />
+		<property name="kualiConfigurationService" ref="kualiConfigurationService"/>
+	</bean>
+    
+    <bean id="awardSyncBase" abstract="true">
+      	<property name="awardSyncUtilityService" ref="awardSyncUtilityService"/>
+    </bean>
+    
+    <bean id="awardSyncAwardHelper" parent="awardSyncBase" 
+    	  class="org.kuali.kra.award.awardhierarchy.sync.helpers.AwardSyncAwardHelper"/>
+        
+    <bean id="awardSyncPersonHelper" parent="awardSyncBase"
+          class="org.kuali.kra.award.awardhierarchy.sync.helpers.AwardSyncPersonHelper"/>
+    
+    <bean id="awardSyncUnitHelper" parent="awardSyncBase"
+          class="org.kuali.kra.award.awardhierarchy.sync.helpers.AwardSyncUnitHelper"/>    
+    
+    <bean id="awardSyncTermHelper" parent="awardSyncBase"
+          class="org.kuali.kra.award.awardhierarchy.sync.helpers.AwardSyncTermHelper"/>
+          
+    <bean id="awardSyncSponsorContactHelper" parent="awardSyncBase"
+          class="org.kuali.kra.award.awardhierarchy.sync.helpers.AwardSyncSponsorContactHelper"/>
+          
+    <bean id="awardSyncReportHelper" parent="awardSyncBase"
+          class="org.kuali.kra.award.awardhierarchy.sync.helpers.AwardSyncReportHelper"/>
+
+    <bean id="awardSyncReportRecipientHelper" parent="awardSyncBase"
+          class="org.kuali.kra.award.awardhierarchy.sync.helpers.AwardSyncReportRecipientHelper"/>
+          
+    <bean id="awardSyncCommentsHelper" parent="awardSyncBase"
+          class="org.kuali.kra.award.awardhierarchy.sync.helpers.AwardSyncCommentsHelper"/>          
+          
+    <bean id="awardSyncHelpersService" class="org.kuali.kra.award.awardhierarchy.sync.service.AwardSyncHelpersServiceImpl">
+    		<property name="syncHelpers">
+			<map>
+ 				<entry key="Award"><ref bean="awardSyncAwardHelper"/></entry>
+				<entry key="AwardPerson"><ref bean="awardSyncPersonHelper"/></entry>
+				<entry key="AwardPersonUnit"><ref bean="awardSyncUnitHelper"/></entry>
+				<entry key="AwardSponsorTerm"><ref bean="awardSyncTermHelper"/></entry>
+				<entry key="AwardSponsorContact"><ref bean="awardSyncSponsorContactHelper"/></entry>
+				<entry key="AwardReportTerm"><ref bean="awardSyncReportHelper"/></entry>
+				<entry key="AwardReportTermRecipient"><ref bean="awardSyncReportRecipientHelper"/></entry>
+				<entry key="AwardComment"><ref bean="awardSyncCommentsHelper"/></entry>
+			</map>
+		</property>
+	</bean>
+          
+	<bean id="awardSyncCreationService" class="org.kuali.kra.award.awardhierarchy.sync.service.AwardSyncCreationServiceImpl">
+		<property name="xmlSerializerService" ref="xmlObjectSerializerService"/>
+		<property name="businessObjectService" ref="businessObjectService"/>
+		<property name="awardSyncHelpersService" ref="awardSyncHelpersService"/>
+	</bean>
+	
+	<bean id="awardSyncSelectorService" class="org.kuali.kra.award.awardhierarchy.sync.service.AwardSyncSelectorServiceImpl">
+		<property name="parameterService" ref="parameterService"/>
+	</bean>
+        
+	<bean id="awardSyncService" class="org.kuali.kra.award.awardhierarchy.sync.service.AwardSyncServiceImpl">
+	    <property name="awardService" ref="awardService"/>
+		<property name="awardHierarchyService" ref="awardHierarchyService"/>
+		<property name="awardSyncSelectorService" ref="awardSyncSelectorService" />
+		<property name="awardSyncCreationService" ref="awardSyncCreationService" />
+		<property name="awardSyncUtilityService" ref="awardSyncUtilityService" />
+		<property name="versionHistoryService" ref="versionHistoryService"/>
+		<property name="businessObjectService" ref="businessObjectService"/>
+		<property name="documentService" ref="documentService"/>
+		<property name="personService" ref="personService"/>
+		<property name="awardSyncHelpersService" ref="awardSyncHelpersService"/>
+		<property name="pessimisticLockService" ref="awardLockService" />
+		<property name="kraWorkflowService" ref="kraWorkflowService"/>
+		<property name="syncExecutor">
+			<!-- Leaving this as an executor, but care should be taken before making this a concurrent executor
+			     as database synchronization bugs still exist -->
+			<bean class="org.springframework.core.task.SyncTaskExecutor"></bean>
+		</property>		
+	</bean>
+	
+	<bean id="awardTemplateLookupable " class="org.kuali.rice.kns.lookup.KualiLookupableImpl" scope="prototype">
+  		<property name="lookupableHelperService">
+    		<ref bean="awardTemplateLookupableHelperServiceImpl" />
+  		</property>  		
+	</bean>		
+	<bean id="awardTemplateLookupableHelperServiceImpl" class="org.kuali.kra.award.lookup.AwardTemplateLookupableHelperServiceImpl" parent="lookupableHelperService" scope="prototype">
+  	</bean>
+	
+	<!-- Exposing java awardAccountService -->
+	<bean id="awardAccountServiceJavaExporter" class="org.kuali.rice.ksb.messaging.KSBExporter">
+		<property name="serviceDefinition">
+			<bean class="org.kuali.rice.ksb.messaging.JavaServiceDefinition">
+				<property name="service" ref="awardAccountService" />
+				<property name="serviceNameSpaceURI" value="KC" />
+				<property name="localServiceName" value="awardAccountService" />
+				<property name="serviceInterface"
+					value="org.kuali.kra.external.award.AwardAccountService" />
+				<property name="busSecurity" value="false" />
+				<property name="retryAttempts" value="1" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- Exposing SOAP awardAccountService -->
+	<bean id="awardAccountServiceSoapExporter" class="org.kuali.rice.ksb.messaging.KSBExporter">
+		<property name="serviceDefinition">
+			<bean class="org.kuali.rice.ksb.messaging.SOAPServiceDefinition">
+				<property name="service" ref="awardAccountService" />
+				<property name="serviceNameSpaceURI" value="KC" />
+				<property name="localServiceName" value="awardAccountSoapService" />
+				<property name="busSecurity" value="false" />
+				<property name="jaxWsService" value="true" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="awardAccountService"
+		class="org.kuali.kra.external.award.impl.AwardAccountServiceImpl">
+		<property name="businessObjectService" ref="businessObjectService" />
+		<property name="parameterService" ref="parameterService" />
+	</bean>
+	
+	<bean id="cfdaService" class="org.kuali.kra.external.Cfda.service.impl.CfdaServiceImpl">
+		<property name="parameterService" ref="parameterService"/>
+		<property name="businessObjectService" ref="businessObjectService" />
+		<property name="dateTimeService" ref="dateTimeService" />
+	</bean>
+	
+	<!-- Quartz configuration for CFDA batch job-->
+	<!-- Use JobDetail here since the MethodInvokingJobDetailFactoryBean does not support persistent storage-->
+	<bean id="cfdaBatchJobDetail" class="org.quartz.JobDetail" >
+		<property name="jobClass" value="org.kuali.kra.external.Cfda.CfdaBatchJob" />
+		<property name="name" value="cfdaBatchJobDetail" />
+	</bean>
+	
+	<bean id="cfdaTrigger" class="org.kuali.kra.external.Cfda.CfdaCronTrigger">
+		<property name="jobDetail" ref="cfdaBatchJobDetail" />
+		<property name="parameterService" ref="parameterService" />
+	</bean>
+
+	<bean id="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="cfdaTrigger"/>
+			</list>
+		</property>
+		<!-- Injecting these services into the scheduler factory so it can be added to the job context 
+		which is passed to the executeInternal method of the job class.
+		-->
+		<property name= "schedulerContextAsMap">
+			<map>
+				<entry key="cfdaService" > 
+					<ref bean="cfdaService" /> 
+				</entry>
+				<entry key="parameterService"> 
+					<ref bean="parameterService" /> 
+				</entry>
+				<entry key="kcNotificationService"> 
+                    <ref bean="kcNotificationService" /> 
+                </entry>
+				<entry key="user" value= "${batchJobUserName}" />
+			</map>
+		</property>
+		<property name="quartzProperties">
+			<props>
+				<prop key="org.quartz.jobStore.tablePrefix">${kcQuartzDatabasePrefix}</prop>
+			</props>
+		</property>
+		<!-- Datasource is defined in RiceOverridesSpringbeans.xml -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- This is set to true so that the tables are modified when the job is modified, otherwise
+		manual deletion of values from tables will be required every time job is changed-->
+	  	<property name="overwriteExistingJobs" value="true" />
+	 </bean>
+	<!-- Quartz configuration end -->
+	
+	<bean id="cfdaNumberServiceJavaExporter" class="org.kuali.rice.ksb.messaging.KSBExporter">
+		<property name="serviceDefinition">
+			<bean class="org.kuali.rice.ksb.messaging.JavaServiceDefinition">
+				<property name="service" ref="cfdaNumberService" />
+				<property name="serviceNameSpaceURI" value="KC" />
+				<property name="localServiceName" value="cfdaNumberService" />
+				<property name="serviceInterface"
+					value="org.kuali.kra.external.Cfda.service.CfdaNumberService" />
+				<property name="busSecurity" value="false" />
+				<property name="retryAttempts" value="1" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="cfdaNumberServiceSoapExporter" class="org.kuali.rice.ksb.messaging.KSBExporter">
+		<property name="serviceDefinition">
+			<bean class="org.kuali.rice.ksb.messaging.SOAPServiceDefinition">
+				<property name="service" ref="cfdaNumberService" />
+				<property name="serviceNameSpaceURI" value="KC" />
+				<property name="localServiceName" value="cfdaNumberSoapService" />
+				<property name="busSecurity" value="false" />
+				<property name="jaxWsService" value="true" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="cfdaNumberService"
+		class="org.kuali.kra.external.Cfda.service.impl.CfdaNumberServiceImpl">
+		<property name="businessObjectService" ref="businessObjectService" />
+	</bean>
+	
+	<bean id="reportTrackingService" class="org.kuali.kra.award.paymentreports.awardreports.reporting.service.ReportTrackingServiceImpl">
+		<property name="awardScheduleGenerationService" ref="awardScheduleGenerationService" />
+		<property name="businessObjectService" ref="businessObjectService" />
+		<property name="awardService" ref="awardService" />
+	</bean>
+	
+	<bean id="reportTrackingLookupableHelperService" class="org.kuali.kra.award.paymentreports.awardreports.reporting.service.ReportTrackingLookupableHelperServiceImpl" parent="lookupableHelperService" scope="prototype">
+        <property name="reportTrackingDao">
+            <ref bean="reportTrackingDao" />
+        </property>
+  	</bean>
+  	
+	<bean id="reportTrackingLookupable" class="org.kuali.rice.kns.lookup.KualiLookupableImpl" scope="prototype">
+  		<property name="lookupableHelperService">
+    		<ref bean="reportTrackingLookupableHelperService" />
+  		</property>
+	</bean>  	
+
+	<bean id="reportTrackingDao" parent="platformAwareDao" class="org.kuali.kra.award.paymentreports.awardreports.reporting.service.ReportTrackingDaoOjb">
+	    <property name="persistenceStructureService">
+    		<ref bean="persistenceStructureService"/>
+    	</property>
+	    <property name="persistenceStructureServiceLocal">
+    		<ref bean="persistenceStructureService"/>
+    	</property>    	
+    	<property name="dateTimeService">
+    		<ref bean="dateTimeService"/>
+    	</property>
+	</bean>
+	
+	<bean id="reportTrackingSearchViews" class="org.kuali.kra.award.paymentreports.awardreports.reporting.service.ReportTrackingSearchViews" init-method="init">
+	    <property name="piViewName" value="PI View"/>
+	    <property name="customViewName" value="Customize View..."/>
+		<property name="reportTrackingViews">
+		  <list>
+		    <bean class="org.kuali.kra.award.paymentreports.ReportTrackingView">
+		    	<property name="viewName" value="PI View"/>
+		    	<property name="groupByDisplayCols">
+		    		<list>
+		    			<value>piName</value>
+		    			<value>reportClass.description</value>
+		    			<value>report.description</value>
+		    			<value>frequency.description</value>
+		    			<value>frequencyBase.description</value>
+		    			<value>baseDate</value>
+		    			<value>distribution.description</value>
+		    		</list>
+		    	</property>
+		    	<property name="detailCols">
+		    		<list>
+		    			<value>awardNumber</value>
+		    			<value>leadUnitNumber</value>
+		    			<value>leadUnit.unitName</value>
+		    			<value>reportStatus.description</value>
+		    			<value>dueDate</value>
+		    			<value>overdue</value>
+		    			<value>activityDate</value>
+		    			<value>comments</value>
+		    			<value>preparerName</value>
+		    		</list>
+		    	</property>
+		    </bean>
+		    <bean class="org.kuali.kra.award.paymentreports.ReportTrackingView">
+		    	<property name="viewName" value="Award View"/>
+		    	<property name="groupByDisplayCols">
+		    		<list>
+		    			<value>awardNumber</value>
+		    			<value>piName</value>
+		    			<value>sponsorCode</value>
+		    			<value>sponsorAwardNumber</value>
+		    			<value>title</value>
+		    		</list>
+		    	</property>
+		    	<property name="detailCols">
+		    		<list>
+		    			<value>awardNumber</value>
+		    			<value>reportClass.description</value>
+		    			<value>report.description</value>
+		    			<value>frequency.description</value>
+		    			<value>baseDate</value>
+		    			<value>dueDate</value>
+		    			<value>distribution.description</value>
+		    			<value>activityDate</value>
+		    			<value>comments</value>
+		    			<value>preparerName</value>
+		    		</list>
+		    	</property>
+		    </bean>
+		    <bean class="org.kuali.kra.award.paymentreports.ReportTrackingView">
+		    	<property name="viewName" value="Sponsor View"/>
+		    	<property name="groupByDisplayCols">
+		    		<list>
+		    			<value>sponsorCode</value>
+		    		</list>
+		    	</property>
+		    	<property name="detailCols">
+		    		<list>
+		    			<value>awardNumber</value>
+		    			<value>piName</value>
+		    			<value>reportClass.description</value>
+		    			<value>report.description</value>
+		    			<value>reportStatus.description</value>
+		    			<value>dueDate</value>
+		    			<value>sponsorAwardNumber</value>
+		    			<value>title</value>
+		    		</list>
+		    	</property>
+		    </bean>	
+		    <bean class="org.kuali.kra.award.paymentreports.ReportTrackingView">
+		    	<property name="viewName" value="Customize View..."/>
+		    	<property name="groupByDisplayCols">
+		    		<list>
+		    			<value>piName</value>
+		    			<value>reportClass.description</value>
+		    			<value>report.description</value>
+		    			<value>frequency.description</value>
+		    			<value>frequencyBase.description</value>
+		    			<value>baseDate</value>
+		    			<value>distribution.description</value>
+		    		</list>
+		    	</property>
+		    	<property name="detailCols">
+		    		<list>
+		    			<value>awardNumber</value>
+		    			<value>leadUnitNumber</value>
+		    			<value>leadUnit.unitName</value>
+		    			<value>reportStatus.description</value>
+		    			<value>dueDate</value>
+		    			<value>overdue</value>
+		    			<value>activityDate</value>
+		    			<value>comments</value>
+		    			<value>preparerName</value>
+		    		</list>
+		    	</property>
+		    	
+		    </bean>		    
+		  </list>
+		</property>
+		<property name="allFields">
+			<list>
+				<value>awardNumber</value>
+				<value>piName</value>
+				<value>leadUnitNumber</value>
+				<value>leadUnit.unitName</value>
+				<value>reportClass.description</value>
+				<value>report.description</value>
+				<value>frequency.description</value>
+				<value>frequencyBase.description</value>
+				<value>baseDate</value>
+				<value>reportStatus.description</value>
+				<value>distribution.description</value>
+				<value>dueDate</value>
+				<value>overdue</value>
+				<value>activityDate</value>
+				<value>comments</value>
+				<value>preparerName</value>
+				<value>lastUpdateDate</value>
+				<value>lastUpdateUser</value>
+				<value>sponsorCode</value>
+				<value>sponsor.sponsorName</value>
+				<value>sponsorAwardNumber</value>
+				<value>title</value>
+			</list>
+		</property>
+	</bean>
+	
+</beans>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xsi:schemaLocation="http://www.springframework.org/schema/beans         http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+  <bean id="SubAwardDocument" parent="SubAwardDocument-parentBean"/>
+
+  <bean id="SubAwardDocument-parentBean" abstract="true" parent="TransactionalDocumentEntry">
+    
+    <property name="usePessimisticLocking" value="true"/>
+    <property name="useWorkflowPessimisticLocking" value="false"/>
+    
+    <property name="documentTypeName" value="SubAwardDocument"/>
+    <property name="businessRulesClass" value="org.kuali.kra.subaward.subawardrule.SubAwardDocumentRule"/>
+    <property name="documentClass" value="org.kuali.kra.subaward.document.SubAwardDocument"/>
+    <property name="documentAuthorizerClass" value="org.kuali.kra.subaward.document.authorization.SubAwardDocumentAuthorizer"/>
+     
+    <property name="allowsCopy" value="false"/>
+    <property name="headerNavigationList">
+      <list>
+        <bean parent="HeaderNavigation">
+          <property name="headerTabDisplayName" value="Subaward"/>
+          <property name="headerTabNavigateTo" value="subAward"/>
+        </bean>
+    
+        <bean parent="HeaderNavigation">
+          <property name="headerTabDisplayName" value="Financial"/>
+          <property name="headerTabNavigateTo" value="financial"/>
+        </bean>
+       
+       <bean parent="HeaderNavigation">
+          <property name="headerTabDisplayName" value="Custom Data"/>
+          <property name="headerTabNavigateTo" value="customData"/>
+        </bean>
+        
+        <bean parent="HeaderNavigation">
+          <property name="headerTabDisplayName" value="Subaward Actions"/>
+          <property name="headerTabNavigateTo" value="subAwardActions"/>
+        </bean>
+        
+          <bean parent="HeaderNavigation">
+          <property name="headerTabDisplayName" value="Medusa"/>
+          <property name="headerTabNavigateTo" value="medusa"/>
+        </bean>
+      </list>  
+    </property>
+    
+  </bean>
+
+  
+</beans>
