@@ -10,7 +10,7 @@
 	<artifactId>kc_project</artifactId>
 	<packaging>war</packaging>
 	<name>Kuali Coeus</name>
-	<version>5.0.1</version>
+	<version>5.0.1-SNAPSHOT</version>
 	<description>The Kuali Coeus (KC) project is building a comprehensive system to manage the complexities of research administration that fully addresses the needs from the faculty researcher through grants administration to federal funding agencies. KC is using MIT’s proven COEUS system as its baseline design, filling in missing functionality from COEUS, and updating its technical architecture for vendor independence and easier integration with other administration systems.</description>
 	<url>http://kuali.org/kc</url>
 	<organization>
@@ -2055,6 +2055,12 @@
         <kualigan.plugin.prefix>kuali</kualigan.plugin.prefix>
 	</properties>
 
+    <scm>
+        <connection>scm:git:git://github.com/r351574nc3/kc-release.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/r351574nc3/kc-release.git</developerConnection>
+        <url>https://github.com/r351574nc3/kc-release</url>
+        <tag>5.0.1-1</tag>
+    </scm>
     <distributionManagement>
         <repository>
             <id>sonatype-nexus-staging</id>
