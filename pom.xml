@@ -1840,16 +1840,7 @@
            </snapshots> 
    		</pluginRepository>
    	</pluginRepositories>
-	
-	<scm>
-		<connection>scm:svn:https://test.kuali.org/svn/kc_project/trunk
-		</connection>
-		<developerConnection>scm:svn:https://test.kuali.org/svn/kc_project/trunk
-		</developerConnection>
-		<tag>HEAD</tag>
-		<url>https://test.kuali.org/fisheye/browse/kc_project</url>
-	</scm>
-	
+		
 	<issueManagement>
 		<system>Jira</system>
 		<url>https://test.kuali.org/jira/</url>
