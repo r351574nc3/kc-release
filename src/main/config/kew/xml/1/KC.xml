@@ -6,12 +6,14 @@
 		xsi:schemaLocation="ns:workflow/DocumentType resource:DocumentType">
 		<documentType>
 			<name>KC</name>
+			<description>Create a KC document</description>
+            <label>KC</label>
 			<parent>KualiDocument</parent>
 			<serviceNamespace>KC</serviceNamespace>
 			<!--Does not work when using param replacement-->
 			<!--<serviceNamespace>${service.namespace}</serviceNamespace>-->
 			<postProcessorName>
-				org.kuali.rice.kns.workflow.postprocessor.KualiPostProcessor
+				org.kuali.rice.krad.workflow.postprocessor.KualiPostProcessor
 			</postProcessorName>
 		</documentType>
 	</documentTypes>

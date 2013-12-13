@@ -10,16 +10,29 @@
 	<param name="datasource.password">ask your team</param>
 	<param name="datasource.ojb.platform">Oracle9i</param>
 
-	<!-- For Embedded Mode -- up to S2S Configuration -->
+	<!-- For Embedded Mode - up to S2S Configuration - uncomment as needed -->
 	<!--
-	<param name="rice.app.url">http://127.0.0.1:8080/kr-dev</param>
-
-	<param name="kim.runmode">embedded</param>
-	<param name="kcb.runmode">embedded</param>
-	<param name="kew.runmode">embedded</param>
-	<param name="ken.runmode">embedded</param>
-	
+	<param name="rice.server.url">http://127.0.0.1:8080/kr-${environment}</param>
+	<param name="kim.mode">EMBEDDED</param>
+	<param name="kcb.mode">REMOTE</param>
+	<param name="kew.mode">EMBEDDED</param>
+	<param name="ken.mode">REMOTE</param>
+	<param name="ksb.mode">REMOTE</param>
+	<param name="kns.mode">LOCAL</param>
+	<param name="coreservice.mode">REMOTE</param>
+	<param name="location.mode">REMOTE</param>	
+	<param name="core.mode">LOCAL</param>
 	<param name="dev.mode">false</param>
+	
+	<param name="rice.portal.allowed.regex">^(${application.url}|${rice.server.url})(/.*|)</param>
+	<param name="rice.ksb.web.forceEnable">true</param>
+	-->
+	
+	<!-- If running in embedded mode, this should be the same as the context of your Rice server. 
+	Example: For the rice url http://test.kc.kuali.org/kr-dly/portal.jsp
+	the context is kr-dly-->
+	<!--
+	<param name="context.names.rice">kr-${environment}</param>
 	-->
 	
 	<!-- Rice Server DB -->
@@ -37,16 +50,22 @@
 	<param name="s2s.truststore.password">truststore password</param>
 	<param name="grants.gov.s2s.host">grants.gov host</param>
 	<param name="grants.gov.s2s.port">grants.gov port</param>
+  	<param name="research.gov.keystore.location">path to keystore for research.gov(can be the same as s2s/grants.gov and provided for flexibility)</param>
+    <param name="research.gov.keystore.password">keystore password</param>
+    <param name="research.gov.truststore.location">path to truststore</param>
+    <param name="research.gov.truststore.password">truststore password</param>
+    <param name="research.gov.s2s.host">research.gov host</param>
+    <param name="research.gov.s2s.port">reserach.gov port</param>
 	
 	<!-- Logging print Configuration -->
 	<param name="print.logging.directory">log directory path</param>
 	<param name="print.logging.enable">"true" to enable logging</param>
 	
+	<!-- Save Xml Configuration -->
+	<param name="print.xml.directory">directory path</param>
+	
 	<!-- Financial System WSDL Service URL -->
     <param name="fin.system.integration.service.url">financial system service url</param>
-    
-    
-	
 
 	<!-- Java mail properties -->
 	<param name="mail.from">mail.from@kuali.org</param>
@@ -60,11 +79,13 @@
 	<!-- Kuali parameters -->
 	<param name="mail.relay.server">mail.relay.server</param>
 	<param name="mailing.list.batch">mailing.list.batch</param>
-	<param name="encryption.key">7IC64w6ksLU</param>
+	<param name="encryption.key">7IC64w6kAAAA</param>
 	
 	<param name="keystore.alias">the_alias</param>
 	<param name="keystore.file">/path/to/keystore</param>
 	<param name="keystore.password">the_password</param>
+	
+	<param name="print.xml.directory">${java.io.tmpdir}/printing</param>
 
 	<!-- Configuration for Exception Incident handling and reporting -->
 	<param name="KualiExceptionHandlerAction.EXCEPTION_INCIDENT_REPORT_SERVICE">knsExceptionIncidentService</param>

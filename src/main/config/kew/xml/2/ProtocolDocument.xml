@@ -8,12 +8,13 @@
 			<description>Create a KC Protocol Document</description>
 			<label>KC Protocol</label>
 			<parent>KC</parent>
-			<postProcessorName>org.kuali.rice.kns.workflow.postprocessor.KualiPostProcessor</postProcessorName>
+			<postProcessorName>org.kuali.rice.krad.workflow.postprocessor.KualiPostProcessor</postProcessorName>
 			<superUserWorkgroupName>KC-WKFLW:IRBAdmin</superUserWorkgroupName>
 			<blanketApproveWorkgroupName>KC-WKFLW:IRBAdmin</blanketApproveWorkgroupName>
 			<defaultExceptionWorkgroupName>KC-WKFLW:IRBAdmin</defaultExceptionWorkgroupName>
 			<docHandler>${kuali.docHandler.url.prefix}/protocolProtocol.do?methodToCall=docHandler</docHandler>
             <helpDefinitionURL>default.htm?turl=Documents/protocol.htm</helpDefinitionURL>
+            <authorizer>org.kuali.kra.irb.auth.ProtocolWorkflowDocumentAuthorizer</authorizer>
 			<active>true</active>
 			<policies>
 				<policy>
@@ -38,7 +39,8 @@
 			</policies>
 			<routePaths>
 				<routePath>
-					<start name="Initiated" nextNode="DepartmentReview" />
+					<start name="Initiated" nextNode="PeopleFlows" />
+					<requests name="PeopleFlows" nextNode="DepartmentReview" />
 					<requests name="DepartmentReview" nextNode="IRBReview" />
 					<requests name="IRBReview" />
 				</routePath>
@@ -51,13 +53,17 @@
 				<start name="Initiated">
 					<activationType>S</activationType>
 				</start>
+				<requests name="PeopleFlows">
+                    <activationType>R</activationType>
+                    <rulesEngine executorClass="org.kuali.kra.irb.IrbProtocolRulesEngineExecutorImpl"/>
+                </requests>
 				<requests name="DepartmentReview">
 					<!-- <qualifierResolver>UnitRouting-XPathQualifierResolver</qualifierResolver> -->
 					<qualifierResolverClass>org.kuali.rice.kew.role.NullQualifierResolver</qualifierResolverClass>
 					<ruleTemplate>UnitApproval</ruleTemplate>
                     <activationType>P</activationType>
 					<finalApproval>false</finalApproval>
-	            </requests>				
+	            </requests>
                 <role name="IRBReview">
 					<qualifierResolver>ProtocolApprover-XPathQualifierResolver</qualifierResolver> 
                     <activationType>S</activationType>
@@ -105,12 +111,12 @@
 			<type>QualifierResolver</type>
 			<serviceNamespace>KC</serviceNamespace>
 			<resolverConfig>
-				<qualifier name="protocol">
+				<attributes name="protocol">
 					<xPathExpression>//document/protocolList[1]/org.kuali.kra.irb.Protocol[1]/protocolNumber[1]</xPathExpression>
-				</qualifier>
-				<qualifier name="unitNumber">
+				</attributes>
+				<attributes name="unitNumber">
 					<xPathExpression>//document/protocolList[1]/org.kuali.kra.irb.Protocol[1]/leadUnitNumber[1]</xPathExpression>
-				</qualifier>
+				</attributes>
 			</resolverConfig>
 		</ruleAttribute>
 		
@@ -146,9 +152,9 @@
 			<type>QualifierResolver</type>
 			<serviceNamespace>KC</serviceNamespace>
 			<resolverConfig>
-				<qualifier name="unitNumber">
+				<attributes name="unitNumber">
 					<xPathExpression>//document/protocolList[1]/org.kuali.kra.irb.Protocol[1]/leadUnitNumber[1]</xPathExpression>
-				</qualifier>
+				</attributes>
 			</resolverConfig>
 		</ruleAttribute> -->
 		

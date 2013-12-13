@@ -7,14 +7,21 @@
 	<param name="datasource.ojb.platform">Oracle9i</param>
 
 	<!-- For Embedded Mode -->
-	<param name="rice.app.url">http://127.0.0.1:8080/kr-dev</param>
-
-	<param name="kim.runmode">embedded</param>
-	<param name="kcb.runmode">embedded</param>
-	<param name="kew.runmode">embedded</param>
-	<param name="ken.runmode">embedded</param>
-	
+	<param name="rice.server.url">http://127.0.0.1:8090/kr-dev</param>
+	<param name="kim.mode">EMBEDDED</param>
+	<param name="kcb.mode">REMOTE</param>
+	<param name="kew.mode">EMBEDDED</param>
+	<param name="ken.mode">REMOTE</param>
+	<param name="ksb.mode">REMOTE</param>
+	<param name="kns.mode">LOCAL</param>
+	<param name="krad.mode">REMOTE</param>
+    <param name="krms.mode">REMOTE</param>
+	<param name="coreservice.mode">REMOTE</param>
+	<param name="location.mode">REMOTE</param>	
+	<param name="core.mode">LOCAL</param>
 	<param name="dev.mode">false</param>
+	<param name="rice.portal.allowed.regex">^(${application.url}|${rice.server.url})(/.*|)</param>
+	
 	
 	<!-- Rice Server DB -->
 	<!-- Should be the same as KC Client DB when running bundled mode -->
@@ -29,11 +36,20 @@
 	<param name="keystore.password">r1c3pw</param>
 	
 	<param name="rice.portal.links.showRiceServerConfig">true</param>
-	<param name="rice.portal.logout.redirectUrl">${rice.app.url}/logout.do</param>
+	<param name="rice.ksb.web.forceEnable">true</param>	
+	<param name="rice.portal.logout.redirectUrl">${rice.server.url}/logout.do</param>
+	<!-- When running in embedded mode this should be the same as the context of your Rice server. 
+	Example: For the rice url http://test.kc.kuali.org/kr-dly/portal.jsp
+	the context is kr-dly-->
+	<param name="context.names.rice">kr-dev</param>
+	
 	
 	<!-- Logging print Configuration -->
 	<param name="print.logging.directory">log directory path</param>
 	<param name="print.logging.enable">"true" to enable logging</param>
+	
+	<!-- Save Xml Configuration -->
+	<param name="print.xml.directory">${java.io.tmpdir}/printing</param>
 	
 	<!-- Financial System WSDL Service URL -->
 	<param name="fin.system.integration.service.url">financial system service url</param>

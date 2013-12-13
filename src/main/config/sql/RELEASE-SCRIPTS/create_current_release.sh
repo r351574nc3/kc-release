@@ -7,7 +7,7 @@ then
 	exit
 fi
 current_version="$1"
-if [ ! -d "../current/${current_version}" ]
+if [ ! -d "../current/${current_version}" ] && [ ! -d "../current_mysql/${current_version}" ]
 then
 	echo "${current_version} directory does not exist"
 	exit
@@ -21,9 +21,10 @@ fi
 
 cd "${script_dir_name}"
 
-app_names='KC KR KRC'
-db_types='ORACLE MYSQL'
-sql_dirs='sequences tables views dml constraints'
+#main_dir=`pwd`
+#main_dir=`basename $main_dir`
+#release_version="${main_dir%-*}"
+#base_version="${release_version#KC-*}"
 
 make_file()
 {
@@ -77,6 +78,24 @@ make_file()
 	fi
 }
 
+make_script() {
+for thisApp in ${app_names}
+    do
+        for thisDB in ${db_types}
+        do
+            sqlFile="${thisApp}-RELEASE-${converted_version}-${typeStr}-${thisDB}.sql"
+            logFile="${thisApp}-RELEASE-${converted_version}-${typeStr}-${thisDB}-Install.log"
+            make_file > ${sqlFile}
+            make_result="$?"
+            if [ "${make_result}" != 0 ]
+            then
+                echo "Returned ${make_result} deleting ${sqlFile}"
+                rm ${sqlFile}
+            fi
+        done
+    done
+}
+
 dataTypes='BS DM'
 for thisType in ${dataTypes}
 do
@@ -86,21 +105,16 @@ do
 	else
 		typeStr='Upgrade'
 	fi
-	for thisApp in ${app_names}
-	do
-		for thisDB in ${db_types}
-		do
-			sqlFile="${thisApp}-RELEASE-${converted_version}-${typeStr}-${thisDB}.sql"
-			logFile="${thisApp}-RELEASE-${converted_version}-${typeStr}-${thisDB}-Install.log"
-			make_file > ${sqlFile}
-			make_result="$?"
-			if [ "${make_result}" != 0 ]
-			then
-				echo "Returned ${make_result} deleting ${sqlFile}"
-				rm ${sqlFile}
-			fi
-		done
-	done
+	
+    app_names='KC_RICE KR_RICE KRC_RICE'
+    db_types='ORACLE MYSQL'
+    sql_dirs='rice'
+    make_script
+	
+	app_names='KC KR KRC'
+    db_types='ORACLE MYSQL'
+    sql_dirs='sequences tables views dml constraints'
+	make_script
 done	
 
 

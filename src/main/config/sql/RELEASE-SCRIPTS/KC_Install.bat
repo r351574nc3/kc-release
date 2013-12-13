@@ -2,12 +2,15 @@
 if NOT EXIST "LOGS" mkdir LOGS
 :mode
 set /p mode="Enter Rice Mode (BUNDLE, EMBED) <%mode%>: "
-if /i "%mode%" == "BUNDLE" goto DBType
+if /i "%mode%" == "BUNDLE" (
+	set InstRice=Y
+	goto DBType
+)
 if /i "%mode%" == "EMBED" goto InstRice
 echo invalid Rice Mode entered <%mode%>
 goto mode
 :InstRice
-set /p InstRice="Install/Upgrade Embedded Rice Server Side (Y,N) <%InstRice%>: "
+set /p InstRice="Install/Upgrade Embedded Rice Server Side (KC-related Rice data will still be loaded, regardless of response) (Y,N) <%InstRice%>: "
 if /i "%InstRice%" == "Y" goto DBType
 if /i "%InstRice%" == "N" goto DBType
 echo Invalid Response <%InstRice%>
@@ -21,12 +24,12 @@ echo Invalid Database Type <%dbtype%>
 goto dbtype
 
 :Version
-set /p Version="Enter Currently Installed Version (NEW, 3.0, 3.0.1, 3.1, 3.1.1) <%Version%>: "
+set /p Version="Enter Currently Installed Version (NEW, 3.1.1, 5.0, 5.0.1, 5.1) <%Version%>: "
 if /i "%Version%" == "NEW" goto User
-if /i "%Version%" == "3.0" goto User
-if /i "%Version%" == "3.0.1" goto User
-if /i "%Version%" == "3.1" goto User
 if /i "%Version%" == "3.1.1" goto User
+if /i "%Version%" == "5.0" goto User
+if /i "%Version%" == "5.0.1" goto User
+if /i "%Version%" == "5.1" goto User
 echo Invalid Version <%Version%>
 goto Version
 
@@ -59,9 +62,9 @@ goto DBSvrNm
 
 :RICE
 if /i "%mode%" == "BUNDLE" (
-set Riceun="%un%"
-set Ricepw="%pw%"
-set RiceDBSvrNm="%DBSvrNm%"
+set Riceun=%un%
+set Ricepw=%pw%
+set RiceDBSvrNm=%DBSvrNm%
 goto INSTALL
 )
 :RiceUser
@@ -107,85 +110,180 @@ if /i "%version%" == "NEW" (
 )
 
 sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < krrelease/datasql/KR_00_SEQ_BS.sql
-
-if /i "%version%" == "NEW" (
-    sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < oracle_server.sql
-    sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < oracle_client.sql
-)
-
-move *.log ../../LOGS/
 cd ../..
 
 goto %version%%dbtype%
 goto usage
 
 :NEWORACLE
-:3.0ORACLE
+cd KC-RELEASE-3_0-CLEAN/oracle
+if /i "%InstRice%" == "Y" (
+    sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < oracle_server.sql
+) else (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < oracle_server_SR.sql
+)
+sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < oracle_client.sql
+
+move *.log ../../LOGS/
+cd ../..
+
 cd KC-RELEASE-3_0_1-SCRIPT
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-Release-3_0-3_0_1-Upgrade-Oracle-Install.sql
-sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-Release-3_0-3_0_1-Upgrade-Oracle-Install.sql
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-Release-3_0-3_0_1-Upgrade-Oracle-Install.sql
+) else (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-Release-3_0-3_0_1-SR-Oracle-Install.sql
+)
 move *.log ../LOGS
 cd ..
 
-:3.0.1ORACLE
 cd KC-RELEASE-3_1_SP1-SCRIPT
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-Release-3_0_1-3_1_S1-Upgrade-Oracle-Install.sql
-sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-Release-3_0_1-3_1_S1-Upgrade-Oracle-Install.sql
 
-if /i "%mode%%InstRice%" == "EMBEDY" goto 3.1.SP1ORACLERICE
-if /i "%mode%" == "BUNDLE" goto 3.1.SP1ORACLERICE
-goto 3.1.SP1ORACLEFINISH
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-Server-Release-1_0_3-1_0_3_1-Upgrade-Oracle-Install.sql
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-Release-3_0_1-3_1_S1-Upgrade-Oracle-Install.sql
+) else (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-Release-3_0_1-3_1_S1-SR-Oracle-Install.sql
+)
 
-:3.1.SP1ORACLERICE
-sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-Server-Release-1_0_3-1_0_3_1-Upgrade-Oracle-Install.sql
-
-:3.1.SP1ORACLEFINISH
 move *.log ../LOGS
 cd ..
 
 cd KC-RELEASE-3_1_SP2-SCRIPT
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KRC-RELEASE-3_1_SP2-Upgrade-ORACLE.sql
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-3_1_SP2-Upgrade-ORACLE.sql
-sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_SP2-Upgrade-ORACLE.sql
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_SP2-Upgrade-ORACLE.sql
+) else (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_SP2-SR-ORACLE.sql
+)
 move *.log ../LOGS
 cd ..
 
 cd KC-RELEASE-3_1_SP3-SCRIPT
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KRC-RELEASE-3_1_SP3-Upgrade-ORACLE.sql
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-3_1_SP3-Upgrade-ORACLE.sql
-sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_SP3-Upgrade-ORACLE.sql
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_SP3-Upgrade-ORACLE.sql
+) else (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_SP3-SR-ORACLE.sql
+)	
+
 move *.log ../LOGS
 cd ..
 
 cd KC-RELEASE-3_1_SP4-SCRIPT
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KRC-RELEASE-3_1_SP4-Upgrade-ORACLE.sql
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-3_1_SP4-Upgrade-ORACLE.sql
-sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_SP4-Upgrade-ORACLE.sql
 
-if /i "%mode%%InstRice%" == "EMBEDY" goto 3.1.SP4ORACLERICE
-if /i "%mode%" == "BUNDLE" goto 3.1.SP4ORACLERICE
-goto 3.1.SP4ORACLEFINISH
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < RICE-1_0_3_1-1_0_3_2-Upgrade-ORACLE.sql
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_SP4-Upgrade-ORACLE.sql
+) else (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_SP4-SR-ORACLE.sql
+)
 
-:3.1.SP4ORACLERICE
-sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < RICE-1_0_3_1-1_0_3_2-Upgrade-ORACLE.sql
-
-:3.1.SP4ORACLEFINISH
 move *.log ../LOGS
 cd ..
 
-:3.1ORACLE
 cd KC-RELEASE-3_1_1-SCRIPT
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-3_1_1-Upgrade-ORACLE.sql
-sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_1-Upgrade-ORACLE.sql
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_1-Upgrade-ORACLE.sql
+) else (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_1_1-SR-ORACLE.sql
+)
 move *.log ../LOGS/
 cd .. 
 
 :3.1.1ORACLE
 cd KC-RELEASE-3_2-SCRIPT
 sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-3_2-Upgrade-ORACLE.sql
-sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_2-Upgrade-ORACLE.sql
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_2-Upgrade-ORACLE.sql
+) else (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-3_2-SR-ORACLE.sql
+)
 move *.log ../LOGS/
 cd .. 
+
+
+cd KC-RELEASE-4_0-SCRIPT
+if /i "%mode%" == "EMBED" (
+	sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KRC_RICE-RELEASE-4_0-Upgrade-ORACLE.sql
+)
+
+sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC_RICE-RELEASE-4_0-Upgrade-ORACLE.sql
+
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR_RICE-RELEASE-4_0-Upgrade-ORACLE.sql
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-4_0-Upgrade-ORACLE.sql
+) else (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-4_0-SR-ORACLE.sql
+)
+
+sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-4_0-Upgrade-ORACLE.sql
+
+move *.log ../LOGS/
+cd .. 
+
+cd KC-RELEASE-5_0-SCRIPT
+
+if /i "%mode%" == "EMBED" (
+	sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KRC_RICE-RELEASE-5_0-Upgrade-ORACLE.sql
+)
+
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR_RICE-RELEASE-5_0-Upgrade-ORACLE.sql
+)
+
+sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-5_0-Upgrade-ORACLE.sql
+sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-5_0-Upgrade-ORACLE.sql
+
+move *.log ../LOGS/
+cd .. 
+
+:5.0ORACLE
+cd KC-RELEASE-5_0_1-SCRIPT
+
+sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-5_0_1-Upgrade-ORACLE.sql
+sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-5_0_1-Upgrade-ORACLE.sql
+move *.log ../LOGS/
+cd ..
+
+:5.0.1ORACLE
+cd KC-RELEASE-5_1_0-SCRIPT
+
+if /i "%mode%" == "EMBED" (
+	sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KRC_RICE-RELEASE-5_1_0-Upgrade-ORACLE.sql
+)
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR_RICE-RELEASE-5_1_0-Upgrade-ORACLE.sql
+)
+sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-5_1_0-Upgrade-ORACLE.sql
+sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-5_1_0-Upgrade-ORACLE.sql
+move *.log ../LOGS
+cd ..
+
+:5.1ORACLE
+cd KC-RELEASE-5_1_1-SCRIPT
+
+if /i "%mode%" == "EMBED" (
+	sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KRC_RICE-RELEASE-5_1_1-Upgrade-ORACLE.sql
+)
+if /i "%InstRice%" == "Y" (
+	sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR_RICE-RELEASE-5_1_1-Upgrade-ORACLE.sql
+)
+sqlplus "%un%"/"%pw%"@"%DBSvrNm%" < KC-RELEASE-5_1_1-Upgrade-ORACLE.sql
+sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-5_1_1-Upgrade-ORACLE.sql
+move *.log ../LOGS
+cd ..
+
+cd KC-RELEASE-99_9_9-SCRIPT
+sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < KR-RELEASE-99_9_9-Upgrade-ORACLE.sql
+move *.log ../LOGS/
+cd ..
 
 cd KC-RELEASE-3_0-CLEAN/oracle
 sqlplus "%Riceun%"/"%Ricepw%"@"%RiceDBSvrNm%" < krrelease/datasql/KR_00_CLEAN_SEQ_BS.sql
@@ -195,23 +293,25 @@ cd ../..
 goto FINISH
 
 :MYSQL
+
+cd KC-RELEASE-0_0_0-SCRIPT
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-0_0_0-Upgrade-MYSQL.sql > KC-RELEASE-0_0_0-Upgrade-MYSQL-Install.log 2>&1
+
+move *.log ../LOGS
+cd ..
+
 cd KC-RELEASE-3_0-CLEAN/mysql
 
 if /i "%version%" == "NEW" (
     if /i "%mode%" == "BUNDLE" (
-    mysql -u %un% -p%pw% -D %un% -s -f < mysql_server_rice.sql > KC-Release-3_0-Clean-Server-Rice-Mysql-Install.log 2>&1
+    mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < mysql_server_rice.sql > KC-Release-3_0-Clean-Server-Rice-Mysql-Install.log 2>&1
     )
     if /i "%mode%%InstRice%" == "EMBEDY" (
-    mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < mysql_server_rice.sql > KC-Release-3_0-Clean-Server-Rice-Mysql-Install.log 2>&1
+    mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < mysql_server_rice.sql > KC-Release-3_0-Clean-Server-Rice-Mysql-Install.log 2>&1
     )
 )
 
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < krrelease/datasql/KR_00_SEQ_BS.sql > KR_SEQ_BS-Mysql-Install.log 2>&1
-
-if /i "%version%" == "NEW" (
-    mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < mysql_server.sql > KC-Release-3_0-Clean-Server-Mysql-Install.log 2>&1
-    mysql -u %un% -p%pw% -D %un% -s -f < mysql_client.sql > KC-Release-3_0-Clean-Client-Mysql-Install.log 2>&1
-)
+mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < krrelease/datasql/KR_00_SEQ_BS.sql > KR_SEQ_BS-Mysql-Install.log 2>&1
 
 move *.log ../../LOGS/
 cd ../..
@@ -220,75 +320,179 @@ goto %version%%dbtype%
 goto usage
 
 :NEWMYSQL
-:3.0MYSQL
+cd KC-RELEASE-3_0-CLEAN/mysql
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < mysql_server.sql > KC-Release-3_0-Clean-Server-Mysql-Install.log 2>&1
+) else (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < mysql_server_SR.sql > KC-Release-3_0-Clean-Server-SR-Mysql-Install.log 2>&1
+)
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < mysql_client.sql > KC-Release-3_0-Clean-Client-Mysql-Install.log 2>&1
+
+move *.log ../../LOGS
+cd ../..
+
 cd KC-RELEASE-3_0_1-SCRIPT
-mysql -u %un% -p%pw% -D %un% -s -f < KC-Release-3_0-3_0_1-Upgrade-Mysql-Install.sql > KC-Release-3_0-3_0_1-Upgrade-Mysql-Install.log 2>&1
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < KR-Release-3_0-3_0_1-Upgrade-Mysql-Install.sql > KR-Release-3_0-3_0_1-Upgrade-Mysql-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-Release-3_0-3_0_1-Upgrade-Mysql-Install.sql > KC-Release-3_0-3_0_1-Upgrade-Mysql-Install.log 2>&1
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-Release-3_0-3_0_1-Upgrade-Mysql-Install.sql > KR-Release-3_0-3_0_1-Upgrade-Mysql-Install.log 2>&1
+) else (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-Release-3_0-3_0_1-SR-Mysql-Install.sql > KR-Release-3_0-3_0_1-SR-Mysql-Install.log 2>&1
+)
 move *.log ../LOGS
 cd ..
 
-:3.0.1MYSQL
 cd KC-RELEASE-3_1_SP1-SCRIPT
-mysql -u %un% -p%pw% -D %un% -s -f < KC-Release-3_0_1-3_1_S1-Upgrade-Mysql-Install.sql > KC-Release-3_0_1-3_1_S1-Upgrade-Mysql-Install.log 2>&1
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < KR-Release-3_0_1-3_1_S1-Upgrade-Mysql-Install.sql > KR-Release-3_0_1-3_1_S1-Upgrade-Mysql-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-Release-3_0_1-3_1_S1-Upgrade-Mysql-Install.sql > KC-Release-3_0_1-3_1_S1-Upgrade-Mysql-Install.log 2>&1
 
-if /i "%mode%%InstRice%" == "EMBEDY" goto 3.1.SP1MYSQLRICE
-if /i "%mode%" == "BUNDLE" goto 3.1.SP1MYSQLRICE
-goto 3.1.SP1ORACLEFINISH
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-Server-Release-1_0_3-1_0_3_1-Upgrade-Mysql-Install.sql > KR-Server-Release-1_0_3_1-Upgrade-Mysql-Install.log 2>&1
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-Release-3_0_1-3_1_S1-Upgrade-Mysql-Install.sql > KR-Release-3_0_1-3_1_S1-Upgrade-Mysql-Install.log 2>&1
+) else (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-Release-3_0_1-3_1_S1-SR-Mysql-Install.sql > KR-Release-3_0_1-3_1_S1-SR-Mysql-Install.log 2>&1
+)
 
-:3.1.SP1MYSQLRICE
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < KR-Server-Release-1_0_3-1_0_3_1-Upgrade-Mysql-Install.sql > KR-Server-Release-1_0_3_1-Upgrade-Mysql-Install.log 2>&1
-
-:3.1.SP1MYSQLFINISH
 move *.log ../LOGS
 cd ..
 
 cd KC-RELEASE-3_1_SP2-SCRIPT
-mysql -u %un% -p%pw% -D %un% -s -f < KRC-RELEASE-3_1_SP2-Upgrade-MYSQL.sql > KRC-RELEASE-3_1_SP2-Upgrade-MYSQL-Install.log 2>&1
-mysql -u %un% -p%pw% -D %un% -s -f < KC-RELEASE-3_1_SP2-Upgrade-MYSQL.sql > KC-RELEASE-3_1_SP2-Upgrade-MYSQL-Install.log 2>&1
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < KR-RELEASE-3_1_SP2-Upgrade-MYSQL.sql > KR-RELEASE-3_1_SP2-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KRC-RELEASE-3_1_SP2-Upgrade-MYSQL.sql > KRC-RELEASE-3_1_SP2-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-3_1_SP2-Upgrade-MYSQL.sql > KC-RELEASE-3_1_SP2-Upgrade-MYSQL-Install.log 2>&1
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_1_SP2-Upgrade-MYSQL.sql > KR-RELEASE-3_1_SP2-Upgrade-MYSQL-Install.log 2>&1
+) else (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_1_SP2-SR-MYSQL.sql > KR-RELEASE-3_1_SP2-SR-MYSQL-Install.log 2>&1
+)
 move *.log ../LOGS
 cd ..
 
 cd KC-RELEASE-3_1_SP3-SCRIPT
-mysql -u %un% -p%pw% -D %un% -s -f < KRC-RELEASE-3_1_SP3-Upgrade-MYSQL.sql > KRC-RELEASE-3_1_SP3-Upgrade-MYSQL-Install.log 2>&1
-mysql -u %un% -p%pw% -D %un% -s -f < KC-RELEASE-3_1_SP3-Upgrade-MYSQL.sql > KC-RELEASE-3_1_SP3-Upgrade-MYSQL-Install.log 2>&1
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < KR-RELEASE-3_1_SP3-Upgrade-MYSQL.sql > KR-RELEASE-3_1_SP3-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KRC-RELEASE-3_1_SP3-Upgrade-MYSQL.sql > KRC-RELEASE-3_1_SP3-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-3_1_SP3-Upgrade-MYSQL.sql > KC-RELEASE-3_1_SP3-Upgrade-MYSQL-Install.log 2>&1
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_1_SP3-Upgrade-MYSQL.sql > KR-RELEASE-3_1_SP3-Upgrade-MYSQL-Install.log 2>&1
+) else (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_1_SP3-SR-MYSQL.sql > KR-RELEASE-3_1_SP3-SR-MYSQL-Install.log 2>&1
+)
 move *.log ../LOGS
 cd ..
 
 cd KC-RELEASE-3_1_SP4-SCRIPT
-mysql -u %un% -p%pw% -D %un% -s -f < KRC-RELEASE-3_1_SP4-Upgrade-MYSQL.sql > KRC-RELEASE-3_1_SP4-Upgrade-MYSQL-Install.log 2>&1
-mysql -u %un% -p%pw% -D %un% -s -f < KC-RELEASE-3_1_SP4-Upgrade-MYSQL.sql > KC-RELEASE-3_1_SP4-Upgrade-MYSQL-Install.log 2>&1
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < KR-RELEASE-3_1_SP4-Upgrade-MYSQL.sql  > KR-RELEASE-3_1_SP4-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KRC-RELEASE-3_1_SP4-Upgrade-MYSQL.sql > KRC-RELEASE-3_1_SP4-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-3_1_SP4-Upgrade-MYSQL.sql > KC-RELEASE-3_1_SP4-Upgrade-MYSQL-Install.log 2>&1
 
-if /i "%mode%%InstRice%" == "EMBEDY" goto 3.1.SP4MYSQLRICE
-if /i "%mode%" == "BUNDLE" goto 3.1.SP4MYSQLRICE
-goto 3.1.SP4MYSQLFINISH
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < RICE-1_0_3_1-1_0_3_2-Upgrade-MYSQL.sql > RICE-1_0_3_1-1_0_3_2-Upgrade-MYSQL-Install.log 2>&1
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_1_SP4-Upgrade-MYSQL.sql  > KR-RELEASE-3_1_SP4-Upgrade-MYSQL-Install.log 2>&1
+) else (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_1_SP4-SR-MYSQL.sql  > KR-RELEASE-3_1_SP4-SR-MYSQL-Install.log 2>&1
+)
 
-:3.1.SP4MYSQLRICE
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < RICE-1_0_3_1-1_0_3_2-Upgrade-MYSQL.sql > RICE-1_0_3_1-1_0_3_2-Upgrade-MYSQL-Install.log 2>&1
-
-:3.1.SP4MYSQLFINISH
 move *.log ../LOGS
 cd ..
 
-:3.1MYSQL
 cd KC-RELEASE-3_1_1-SCRIPT
-mysql -u %un% -p%pw% -D %un% -s -f < KC-RELEASE-3_1_1-Upgrade-MYSQL.sql > KC-RELEASE-3_1_1-Upgrade-MYSQL-Install.log 2>&1
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < KR-RELEASE-3_1_1-Upgrade-MYSQL.sql > KR-RELEASE-3_1_1-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-3_1_1-Upgrade-MYSQL.sql > KC-RELEASE-3_1_1-Upgrade-MYSQL-Install.log 2>&1
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_1_1-Upgrade-MYSQL.sql > KR-RELEASE-3_1_1-Upgrade-MYSQL-Install.log 2>&1
+) else (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_1_1-SR-MYSQL.sql > KR-RELEASE-3_1_1-SR-MYSQL-Install.log 2>&1
+)
 move *.log ../LOGS/
 cd ..
 
-:3.1.1MYSQL
+:3.1.1ORACLE
 cd KC-RELEASE-3_2-SCRIPT
-mysql -u %un% -p%pw% -D %un% -s -f < KC-RELEASE-3_2-Upgrade-MYSQL.sql > KC-RELEASE-3_2-Upgrade-MYSQL-Install.log 2>&1
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < KR-RELEASE-3_2-Upgrade-MYSQL.sql > KR-RELEASE-3_2-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-3_2-Upgrade-MYSQL.sql > KC-RELEASE-3_2-Upgrade-MYSQL-Install.log 2>&1
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_2-Upgrade-MYSQL.sql > KR-RELEASE-3_2-Upgrade-MYSQL-Install.log 2>&1
+) else (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-3_2-SR-MYSQL.sql > KR-RELEASE-3_2-SR-MYSQL-Install.log 2>&1
+)
+move *.log ../LOGS/
+cd ..
+
+
+cd KC-RELEASE-4_0-SCRIPT
+
+if /i "%mode%" == "EMBED" (
+	mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KRC_RICE-RELEASE-4_0-Upgrade-MYSQL.sql > KRC_RICE-RELEASE-4_0-Upgrade-MYSQL-Install.log 2>&1
+)
+
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC_RICE-RELEASE-4_0-Upgrade-MYSQL.sql > KC_RICE-RELEASE-4_0-Upgrade-MYSQL-Install.log 2>&1
+
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR_RICE-RELEASE-4_0-Upgrade-MYSQL.sql > KR_RICE-RELEASE-4_0-Upgrade-MYSQL-Install.log 2>&1
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-4_0-Upgrade-MYSQL.sql > KR-RELEASE-4_0-Upgrade-MYSQL-Install.log 2>&1
+) else (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-4_0-SR-MYSQL.sql > KR-RELEASE-4_0-SR-MYSQL-Install.log 2>&1
+)
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-4_0-Upgrade-MYSQL.sql > KC-RELEASE-4_0-Upgrade-MYSQL-Install.log 2>&1
+
+move *.log ../LOGS/
+cd ..
+
+cd KC-RELEASE-5_0-SCRIPT
+
+if /i "%mode%" == "EMBED" (
+	mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KRC_RICE-RELEASE-5_0-Upgrade-MYSQL.sql > KRC_RICE-RELEASE-5_0-Upgrade-MYSQL-Install.log 2>&1
+)
+
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR_RICE-RELEASE-5_0-Upgrade-MYSQL.sql > KR_RICE-RELEASE-5_0-Upgrade-MYSQL-Install.log 2>&1
+)
+
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-5_0-Upgrade-MYSQL.sql > KC-RELEASE-5_0-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-5_0-Upgrade-MYSQL.sql > KR-RELEASE-5_0-Upgrade-MYSQL-Install.log 2>&1
+move *.log ../LOGS/
+cd ..
+
+:5.0MYSQL
+cd KC-RELEASE-5_0_1-SCRIPT
+
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-5_0_1-Upgrade-MYSQL.sql > KC-RELEASE-5_0_1-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-5_0_1-Upgrade-MYSQL.sql > KR-RELEASE-5_0_1-Upgrade-MYSQL-Install.log 2>&1
+move *.log ../LOGS/
+cd ..
+
+:5.0.1MYSQL
+cd KC-RELEASE-5_1_0-SCRIPT
+
+if /i "%mode%" == "EMBED" (
+	mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KRC_RICE-RELEASE-5_1_0-Upgrade-MYSQL.sql > KRC_RICE-RELEASE-5_1_0-Upgrade-MYSQL-Install.log 2>&1
+)
+
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR_RICE-RELEASE-5_1_0-Upgrade-MYSQL.sql > KR_RICE-RELEASE-5_1_0-Upgrade-MYSQL-Install.log 2>&1
+)
+
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-5_1_0-Upgrade-MYSQL.sql > KC-RELEASE-5_1_0-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-5_1_0-Upgrade-MYSQL.sql > KR-RELEASE-5_1_0-Upgrade-MYSQL-Install.log 2>&1
+move *.log ../LOGS/
+cd ..
+
+:5.1MYSQL
+cd KC-RELEASE-5_1_1-SCRIPT
+
+if /i "%mode%" == "EMBED" (
+	mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KRC_RICE-RELEASE-5_1_1-Upgrade-MYSQL.sql > KRC_RICE-RELEASE-5_1_1-Upgrade-MYSQL-Install.log 2>&1
+)
+
+if /i "%InstRice%" == "Y" (
+	mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR_RICE-RELEASE-5_1_1-Upgrade-MYSQL.sql > KR_RICE-RELEASE-5_1_1-Upgrade-MYSQL-Install.log 2>&1
+)
+
+mysql -u %un% -p%pw% -D %DBSvrNm% -s -f < KC-RELEASE-5_1_1-Upgrade-MYSQL.sql > KC-RELEASE-5_1_1-Upgrade-MYSQL-Install.log 2>&1
+mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-5_1_1-Upgrade-MYSQL.sql > KR-RELEASE-5_1_1-Upgrade-MYSQL-Install.log 2>&1
+move *.log ../LOGS/
+cd ..
+
+cd KC-RELEASE-99_9_9-SCRIPT
+mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < KR-RELEASE-99_9_9-Upgrade-MYSQL.sql > KR-RELEASE-99_9_9-Upgrade-MYSQL-Install.log 2>&1
 move *.log ../LOGS/
 cd ..
 
 cd KC-RELEASE-3_0-CLEAN/mysql
-mysql -u %Riceun% -p%Ricepw% -D %Riceun% -s -f < krrelease/datasql/KR_00_CLEAN_SEQ_BS.sql > KR_CLEAN_SEQ_BS-Mysql-Install.log 2>&1
+mysql -u %Riceun% -p%Ricepw% -D %RiceDBSvrNm% -s -f < krrelease/datasql/KR_00_CLEAN_SEQ_BS.sql > KR_CLEAN_SEQ_BS-Mysql-Install.log 2>&1
 move *.log ../../LOGS/
 cd ../..
 
@@ -309,11 +513,11 @@ Echo       - bundle = Rice installed with KC client tables
 Echo       - embed = Rice installed in a separate schema 
 Echo           - When installing in embedded mode, you will be asked to install embedded rice server.
 Echo    - DB_Type = Choose one: oracle, mysql
-Echo    - Ver = Choose one: new, 3.0, 3.0.1 3.1M3
-Echo       - new = New install with an empty database schema
-Echo       - 3.0 = upgrading from 3.0 KC version
-Echo       - 3.0.1 = upgrading from 3.0.1 KC version
-Echo       - 3.1M3 = upgrading from 3.1M3 KC version
+Echo    - Ver = Choose one: NEW, 3.1.1, 5.0, 5.0.1
+Echo       - NEW = New install with an empty database schema
+Echo       - 3.1.1 = upgrading from 3.1.1 KC version
+Echo       - 5.0 = upgrading from 5.0 KC version
+Echo       - 5.0.1 = upgrading from 5.0.1 KC version
 Echo    - un = The kc Database schema name to install database scripts to (bundled rice goes here too).
 Echo    - pw = the password for username
 Echo    - DB_svr_name = the TNS name used to locate the database server where kc schema is located (Oracle Only)
