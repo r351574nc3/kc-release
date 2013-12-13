@@ -25,7 +25,7 @@
 					<display>
 						<type>text</type>
 					</display>
-					<lookup businessObjectClass="org.kuali.rice.kim.bo.Person">
+					<lookup businessObjectClass="org.kuali.rice.kim.api.identity.Person">
 				      <fieldConversions>
 				        <fieldConversion lookupFieldName="principalName" localFieldName="aggregator"/>
 				      </fieldConversions>
@@ -62,7 +62,7 @@
 					<display>
 						<type>text</type>
 					</display>
-					<lookup businessObjectClass="org.kuali.rice.kim.bo.Person">
+					<lookup businessObjectClass="org.kuali.rice.kim.api.identity.Person">
 				      <fieldConversions>
 				        <fieldConversion lookupFieldName="principalName" localFieldName="budgetCreator"/>
 				      </fieldConversions>
@@ -96,7 +96,7 @@
 					<display>
 						<type>text</type>
 					</display>
-					<lookup businessObjectClass="org.kuali.rice.kim.bo.Person">
+					<lookup businessObjectClass="org.kuali.rice.kim.api.identity.Person">
 				      <fieldConversions>
 				        <fieldConversion lookupFieldName="principalName" localFieldName="narrativeWriter"/>
 				      </fieldConversions>
@@ -129,7 +129,7 @@
 					<display>
 						<type>text</type>
 					</display>
-					<lookup businessObjectClass="org.kuali.rice.kim.bo.Person">
+					<lookup businessObjectClass="org.kuali.rice.kim.api.identity.Person">
 				      <fieldConversions>
 				        <fieldConversion lookupFieldName="principalName" localFieldName="viewer"/>
 				      </fieldConversions>
@@ -337,9 +337,9 @@
 			<type>QualifierResolver</type>
 			<serviceNamespace>KC</serviceNamespace>
 			<resolverConfig>
-				<qualifier name="proposal">
+				<attributes name="proposal">
 					<xPathExpression>//document/developmentProposalList[1]/org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal[1]/proposalNumber[1]</xPathExpression>
-				</qualifier>
+				</attributes>
 			</resolverConfig>
 		</ruleAttribute>
 
@@ -351,9 +351,9 @@
 			<type>QualifierResolver</type>
 			<serviceNamespace>KC</serviceNamespace>
 			<resolverConfig>
-				<qualifier name="unitNumber">
+				<attributes name="unitNumber">
 					<xPathExpression>//document/developmentProposalList[1]/org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal[1]/ownedByUnitNumber[1]</xPathExpression>
-				</qualifier>
+				</attributes>
 			</resolverConfig>
 		</ruleAttribute>
 
@@ -367,7 +367,7 @@
 			</description>
 			<label>Proposal Development Document</label>
 			<parent>KC</parent>
-			<postProcessorName>org.kuali.rice.kns.workflow.postprocessor.KualiPostProcessor</postProcessorName>
+			<postProcessorName>org.kuali.rice.krad.workflow.postprocessor.KualiPostProcessor</postProcessorName>
 		 	<superUserWorkgroupName>KC-WKFLW:OSP Superuser</superUserWorkgroupName>
 			<defaultExceptionWorkgroupName>KC-WKFLW:ProposalAdmin</defaultExceptionWorkgroupName>
 			<docHandler>${kuali.docHandler.url.prefix}/proposalDevelopmentProposal.do?methodToCall=docHandler</docHandler>
@@ -415,7 +415,8 @@
 							<branch name = "False">
 								<!-- The document is a hierarchy parent, or a document that is not part of a hierarchy so it is routed normally. -->
 								<requests name="OSPInitial" nextNode="ProposalPersons" />
-								<requests name="ProposalPersons" nextNode="UnitRouting" />
+								<requests name="ProposalPersons" nextNode="PeopleFlows" />
+								<requests name="PeopleFlows" nextNode="UnitRouting" />
 								<requests name="UnitRouting" nextNode="DepartmentalRouting" />
 								<requests name="DepartmentalRouting" nextNode="OSPOfficeRouting" />
 								<requests name="OSPOfficeRouting" nextNode = "Join" />
@@ -448,6 +449,10 @@
                     <activationType>P</activationType>
 					<finalApproval>false</finalApproval>
 	            </role>
+	            <requests name="PeopleFlows">
+                    <activationType>R</activationType>
+                    <rulesEngine executorClass="org.kuali.kra.proposaldevelopment.service.impl.ProposalDevelopmentRulesEngineExecutorImpl"/>
+                </requests>
 				<requests name="UnitRouting">
 					<qualifierResolver>DepartmentRouting-XPathQualifierResolver</qualifierResolver>
 					<!--  <qualifierResolverClass>org.kuali.rice.kew.role.NullQualifierResolver</qualifierResolverClass> -->

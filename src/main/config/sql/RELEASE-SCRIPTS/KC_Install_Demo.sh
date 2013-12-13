@@ -107,7 +107,28 @@ case "${dbtype}" in
         cd KC-RELEASE-3_2-SCRIPT   
         sqlplus "${un}"/"${pw}${DBSvrNm}" < KC-RELEASE-3_2-Demo-ORACLE.sql
         sqlplus "${Riceun}"/"${Ricepw}${RiceDBSvrNm}" < KR-RELEASE-3_2-Demo-ORACLE.sql
+        
+        mv *.log ../LOGS/
+        cd ..
+        
+        cd KC-RELEASE-4_0-SCRIPT   
+        sqlplus "${un}"/"${pw}${DBSvrNm}" < KC-RELEASE-4_0-Demo-ORACLE.sql
+        sqlplus "${Riceun}"/"${Ricepw}${RiceDBSvrNm}" < KR-RELEASE-4_0-Demo-ORACLE.sql
+        
+        mv *.log ../LOGS/
+        cd ..
+        
+        cd KC-RELEASE-5_0-SCRIPT   
+        sqlplus "${un}"/"${pw}${DBSvrNm}" < KC-RELEASE-5_0-Demo-ORACLE.sql
+        sqlplus "${Riceun}"/"${Ricepw}${RiceDBSvrNm}" < KR-RELEASE-5_0-Demo-ORACLE.sql
+
+        mv *.log ../LOGS/
+        cd ..
                 
+        cd KC-RELEASE-5_0_1-SCRIPT
+        sqlplus "${un}"/"${pw}${DBSvrNm}" < KC-RELEASE-5_0_1-Demo-ORACLE.sql
+        sqlplus "${Riceun}"/"${Ricepw}${RiceDBSvrNm}" < KR-RELEASE-5_0_1-Demo-ORACLE.sql
+
         mv *.log ../LOGS/
         cd .. ;;
 		
@@ -130,6 +151,27 @@ case "${dbtype}" in
         mysql -u ${un} -p${pw} -D ${DBSvrNm} -s -f < KC-RELEASE-3_2-Demo-MYSQL.sql > KC-RELEASE-3_2-Demo-MYSQL-Install.log 2>&1
         mysql -u ${Riceun} -p${Ricepw} -D ${RiceDBSvrNm} -s -f < KR-RELEASE-3_2-Demo-MYSQL.sql > KR-RELEASE-3_2-Demo-MYSQL-Install.log 2>&1
         
+        mv *.log ../LOGS/
+        cd ..
+        
+        cd KC-RELEASE-4_0-SCRIPT
+        mysql -u ${un} -p${pw} -D ${DBSvrNm} -s -f < KC-RELEASE-4_0-Demo-MYSQL.sql > KC-RELEASE-4_0-Demo-MYSQL-Install.log 2>&1
+        mysql -u ${Riceun} -p${Ricepw} -D ${RiceDBSvrNm} -s -f < KR-RELEASE-4_0-Demo-MYSQL.sql > KR-RELEASE-4_0-Demo-MYSQL-Install.log 2>&1
+        
+        mv *.log ../LOGS/
+        cd ..
+        
+        cd KC-RELEASE-5_0-SCRIPT
+        mysql -u ${un} -p${pw} -D ${DBSvrNm} -s -f < KC-RELEASE-5_0-Demo-MYSQL.sql > KC-RELEASE-5_0-Demo-MYSQL-Install.log 2>&1
+        mysql -u ${Riceun} -p${Ricepw} -D ${RiceDBSvrNm} -s -f < KR-RELEASE-5_0-Demo-MYSQL.sql > KR-RELEASE-5_0-Demo-MYSQL-Install.log 2>&1
+        
+        mv *.log ../LOGS/
+        cd ..
+
+        cd KC-RELEASE-5_0_1-SCRIPT
+        mysql -u ${un} -p${pw} -D ${DBSvrNm} -s -f < KC-RELEASE-5_0_1-Demo-MYSQL.sql > KC-RELEASE-5_0_1-Demo-MYSQL-Install.log 2>&1
+        mysql -u ${Riceun} -p${Ricepw} -D ${RiceDBSvrNm} -s -f < KR-RELEASE-5_0_1-Demo-MYSQL.sql > KR-RELEASE-5_0_1-Demo-MYSQL-Install.log 2>&1
+
         mv *.log ../LOGS/
         cd ..
 esac
