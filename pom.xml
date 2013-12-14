@@ -18,6 +18,24 @@
 		<url>http://kuali.org</url>
 	</organization>
 
+    <developers>
+        <developer>
+            <id>leo</id>
+            <name>Leo Przybylski</name>
+            <email>leo@rsmart.com</email>
+            <url>http://kualigan.blogspot.com</url>
+            <organization>rsmart</organization>
+            <organizationUrl>http://www.rsmart.com</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>-7</timezone>
+            <properties>
+                <picUrl>http://www.gravatar.com/avatar/6be04114e185b6fa626a0ee530db34e4.png</picUrl>
+            </properties>
+        </developer>
+    </developers>
+
 	<licenses>
 		<license>
 			<name>The Kuali Foundation Educational Community License 2.0</name>
@@ -1990,15 +2008,6 @@
    		</pluginRepository>
    	</pluginRepositories>
 	
-	<scm>
-		<connection>scm:svn:https://test.kuali.org/svn/kc_project/trunk
-		</connection>
-		<developerConnection>scm:svn:https://test.kuali.org/svn/kc_project/trunk
-		</developerConnection>
-		<tag>HEAD</tag>
-		<url>https://test.kuali.org/fisheye/browse/kc_project</url>
-	</scm>
-	
 	<issueManagement>
 		<system>Jira</system>
 		<url>https://test.kuali.org/jira/</url>
@@ -2204,6 +2213,12 @@
             -->
         <kualigan.plugin.prefix>kuali</kualigan.plugin.prefix>
 	</properties>
+
+    <scm>
+        <connection>scm:git:git://github.com/r351574nc3/kc-release.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/r351574nc3/kc-release.git</developerConnection>
+        <url>https://github.com/r351574nc3/kc-release</url>
+    </scm>
 
     <distributionManagement>
         <repository>
