@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	
 	<!-- 
 		The default build of this project targets a servlet 2.5 web container.  
@@ -10,7 +9,7 @@
 	<artifactId>kc</artifactId>
 	<packaging>war</packaging>
 	<name>Kuali Coeus</name>
-	<version>5.1.1-SNAPSHOT</version>
+	<version>5.1.1</version>
 	<description>The Kuali Coeus (KC) project is building a comprehensive system to manage the complexities of research administration that fully addresses the needs from the faculty researcher through grants administration to federal funding agencies. KC is using MIT’s proven COEUS system as its baseline design, filling in missing functionality from COEUS, and updating its technical architecture for vendor independence and easier integration with other administration systems.</description>
 	<url>http://kuali.org/kc</url>
 	<organization>
@@ -402,9 +401,7 @@
 			            <phase>generate-sources</phase>
 			            <configuration>
 			                <tasks>
-			                    <unzip src="src/main/config/help.zip" 
-			                           dest="src/main/webapp/static/" 
-			                           overwrite="false" />
+			                    <unzip src="src/main/config/help.zip" dest="src/main/webapp/static/" overwrite="false" />
 			                </tasks>
 			            </configuration>
 			            <goals>
@@ -417,8 +414,7 @@
 			            <phase>generate-sources</phase>
 			            <configuration>
 			                <tasks>
-			                    <copy file="src/main/webapp/scripts/easyXDM/resize_intermediate.html" 
-			                    		tofile="src/main/webapp/rice-portal/scripts/easyXDM/resize_intermediate.html"/>
+			                    <copy file="src/main/webapp/scripts/easyXDM/resize_intermediate.html" tofile="src/main/webapp/rice-portal/scripts/easyXDM/resize_intermediate.html" />
 			                </tasks>
 			            </configuration>
 			            <goals>
@@ -1743,7 +1739,7 @@
 	    <profile>
 	      <id>ken-remote-mode</id>
 	      <properties>
-	        <rice.ken.servlet></rice.ken.servlet>
+	        <rice.ken.servlet />
       	</properties>
 	  </profile>
 	  
@@ -2218,7 +2214,8 @@
         <connection>scm:git:git://github.com/r351574nc3/kc-release.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/r351574nc3/kc-release.git</developerConnection>
         <url>https://github.com/r351574nc3/kc-release</url>
-    </scm>
+      <tag>kc-5.1.1</tag>
+  </scm>
 
     <distributionManagement>
         <repository>
